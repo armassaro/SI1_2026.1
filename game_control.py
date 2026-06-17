@@ -2,12 +2,13 @@ from piece import Piece
 from board import Board
 from board_gui import BoardGUI
 from held_piece import HeldPiece
-from ai import AI
+from ai import AI, AIEnum
 from utils import get_surface_mouse_offset, get_piece_position
 from ai import AIEnum
 
+# modificado para receber o algoritmo escolhido no menu
 class GameControl:
-    def __init__(self, player_color, is_computer_opponent):
+    def __init__(self, player_color, is_computer_opponent, cpu_algoritmo):
         self.turn = player_color
         self.winner = None
         self.board = None
@@ -16,7 +17,8 @@ class GameControl:
         self.ai_control = None
 
         if is_computer_opponent:
-            self.ai_control = AI("B", AIEnum.minimax) if player_color == "W" else AI("W")
+            cpu_color = "B" if player_color == "W" else "W"
+            self.ai_control = AI(cpu_color, cpu_algoritmo)
 
         self.setup()
 

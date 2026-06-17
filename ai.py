@@ -122,7 +122,7 @@ class AI:
 			return minimum
 
 	# Implementação do algoritmo Monte Carlo Tree Search, definindo um número padrão de iterações como 1000
-	def mcts(self, current_board: Board, n_iterations: int = 1000) -> dict[str, Any]:
+	def mcts(self, current_board: Board, n_iterations: int = 500) -> dict[str, Any]:
 		# Considera como nó raiz considerando o estado inicial do tabuleiro
 		root: MCTSNode = MCTSNode(deepcopy(current_board), self.color)
 		color_up: str = current_board.get_color_up()
@@ -198,7 +198,7 @@ class AI:
 	def get_move(self, current_board: Board) -> dict[str, int]:
 		if(self.actualAI == AIEnum.MCTS):
 			# Código que utiliza o MCTS
-			move: dict[str, Any] = self.mcts(current_board, n_iterations=600)
+			move: dict[str, Any] = self.mcts(current_board, n_iterations=2000)
 			pieces: list[Piece] = current_board.get_pieces()
 			piece_from: Piece = pieces[move["piece_index"]]
 			move = {"position_to": move["position"], "position_from": piece_from.get_position()}
@@ -245,8 +245,10 @@ class AI:
 
 			# Chooses a random move just in case there are more than one "good" move, then returns it properly.
 			move_chosen: dict[str, Any] = choice(best_moves)
-			return {"position_to": move_chosen["move"]["position"], "position_from": player_pieces[move_chosen["piece"]].get_position()}
-
+			move = {"position_to": move_chosen["move"]["position"], "position_from": player_pieces[move_chosen["piece"]].get_position()}
+			print(self.getColouredMessage("[Minimax] => Nova posição definida!"))
+			print(move)
+			return move
 
 	def get_value(self, board: Board) -> int:
 		# Receives a Board object, returns a value depending on which player won or which player has the most pieces on board.

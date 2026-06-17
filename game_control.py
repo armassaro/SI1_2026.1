@@ -4,6 +4,7 @@ from board_gui import BoardGUI
 from held_piece import HeldPiece
 from ai import AI
 from utils import get_surface_mouse_offset, get_piece_position
+from ai import AIEnum
 
 class GameControl:
     def __init__(self, player_color, is_computer_opponent):
@@ -15,7 +16,7 @@ class GameControl:
         self.ai_control = None
 
         if is_computer_opponent:
-            self.ai_control = AI("B") if player_color == "W" else AI("W")
+            self.ai_control = AI("B", AIEnum.minimax) if player_color == "W" else AI("W")
 
         self.setup()
 

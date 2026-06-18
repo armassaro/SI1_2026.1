@@ -1,11 +1,13 @@
 from utils import get_position_with_row_col
+from constants import BOARD
 
 class Board:
     def __init__(self, pieces, color_up):
         # Example: [Piece('12WND'), Piece('14BNU'), Piece('24WYD')]
         self.pieces = pieces
-        self.color_up = color_up # Defines which of the colors is moving up.
-    
+        self.color_up = color_up # Defines which of the colors is moving up
+        self.board = BOARD
+
     def get_color_up(self):
         return self.color_up
 
@@ -15,7 +17,7 @@ class Board:
     def get_piece_by_index(self, index):
         return self.pieces[index]
 
-    def has_piece(self, position):
+    def has_piece(self, position) -> bool:
         # Receives position (e.g.: 28), returns True if there's a piece in that position
         string_pos = str(position)
 
@@ -76,13 +78,13 @@ class Board:
         
         return results
     
-    def move_piece(self, moved_index, new_position):
-        def is_eat_movement(current_position):
+    def move_piece(self, moved_index, new_position) -> None:
+        def is_eat_movement(current_position) -> int:
             # If the difference in the rows of the current and next positions isn't 1, i.e. if the piece isn't moving one square, 
             # then the piece is eating another piece.
             return abs(self.get_row_number(current_position) - self.get_row_number(new_position)) != 1
 
-        def get_eaten_index(current_position):
+        def get_eaten_index(current_position) -> int:
             current_coords = [self.get_row_number(current_position), self.get_col_number(current_position)]
             new_coords = [self.get_row_number(new_position), self.get_col_number(new_position)]
             eaten_coords = [current_coords[0], current_coords[1]]
@@ -101,13 +103,11 @@ class Board:
 
         def is_king_movement(piece):
             # Receives the piece moving and returns True if the move turns that piece into a king.
-            if piece.is_king() == True:
+            if piece.is_king():
                 return False
-            
             end_row = self.get_row_number(new_position)
             piece_color = piece.get_color()
             king_row = 0 if self.color_up == piece_color else 7
-
             return end_row == king_row
 
         piece_to_move = self.pieces[moved_index]
@@ -137,3 +137,6 @@ class Board:
             return current_color
         
         return None
+    
+    def get_board(self):
+        return self.board

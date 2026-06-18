@@ -39,8 +39,7 @@ class GameControl:
             pieces.append(Piece(str(player_piece) + 'WN'))
         
         self.board = Board(pieces, self.turn)
-        self.board_draw = BoardGUI(self.board)        
-        pass
+        self.board_draw = BoardGUI(self.board)
     
     def draw_screen(self, display_surface):
         self.board_draw.draw_board(display_surface)

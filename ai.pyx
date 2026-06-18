@@ -4,71 +4,22 @@ from piece import Piece
 from copy import deepcopy
 from random import choice
 from typing import Any
-import math
-import time
-from constants import *
-from utils import get_coloured_message
+from libc.string cimport strcpy, strlen
+from libc.stdlib cimport malloc, free
+from libc.math cimport log, sqrt
+from libc.stdint cimport u_int_8
 
-class MinimaxStats:
-	def __init__(self) -> None:
-		self.nodes_evaluated: int = 0
-		self.max_depth_reached: int = 0
-		self.elapsed_time: float = 0.0
-		self.best_score: int = 0
-		self._initial_depth: int = 0
+cdef class MCTSNode:
+	# Tem que saber ainda como é recebido esse tipo Board
+	cdef Board board
+	cdef char* turn
+	cdef MCTSNode parent
+	cdef MCTSNode** children
+	cdef u_int_8 wins
+	cdef u_int_8 visits
+	cdef dict[str, {"piece_index": int, "position": int, "eats_piece": bool}] move
 
-	def reset(self, initial_depth: int) -> None:
-		self.nodes_evaluated = 0
-		self.max_depth_reached = 0
-		self.elapsed_time = 0.0
-		self.best_score = 0
-		self._initial_depth = initial_depth
-
-	def report(self) -> str:
-		return (
-			get_coloured_message(msg=f"[Minimax Stats] Nós avaliados: {self.nodes_evaluated}", ai=AIEnum.MCTS) +
-			f"Profundidade máxima: {self.max_depth_reached} | "
-			f"Melhor pontuação: {self.best_score} | "
-			f"Tempo: {self.elapsed_time:.4f}s"
-		)
-
-
-class MCTSStats:
-	def __init__(self) -> None:
-		self.iterations: int = 0
-		self.nodes_created: int = 0
-		self.max_tree_depth: int = 0
-		self.elapsed_time: float = 0.0
-		self.best_move_visits: int = 0
-		self.best_move_win_rate: float = 0.0
-		self.total_rollout_steps: int = 0
-
-	def reset(self) -> None:
-		self.iterations = 0
-		self.nodes_created = 0
-		self.max_tree_depth = 0
-		self.elapsed_time = 0.0
-		self.best_move_visits = 0
-		self.best_move_win_rate = 0.0
-		self.total_rollout_steps = 0
-
-	@property
-	def avg_rollout_steps(self) -> float:
-		return self.total_rollout_steps / self.iterations if self.iterations > 0 else 0.0
-
-	def report(self) -> str:
-		return (
-			"[MCTS Stats] Iterações: {self.iterations} | "
-			f"Nós criados: {self.nodes_created} | "
-			f"Profundidade máxima: {self.max_tree_depth} | "
-			f"Visitas ao melhor filho: {self.best_move_visits} | "
-			f"Win rate do melhor filho: {self.best_move_win_rate:.2%} | "
-			f"Média de passos por rollout: {self.avg_rollout_steps:.1f} | "
-			f"Tempo: {self.elapsed_time:.4f}s"
-		)
-
-class MCTSNode:
-	def __init__(self, board: Board, turn: str, parent: MCTSNode | None = None, move: dict[str, Any] | None = None, depth: int = 0) -> None:
+	def __init__(self, Board board, char* turn, MCTSNode parent, dict[str, {"piece_index": int, "position": int, "eats_piece": bool}] move) -> None:
 		self.board: Board = board
 		self.turn: str = turn
 		self.parent: MCTSNode | None = parent
@@ -76,7 +27,6 @@ class MCTSNode:
 		self.children: list[MCTSNode] = []
 		self.wins: float = 0.0
 		self.visits: int = 0
-		self.depth: int = depth
 		self._untried_moves: list[dict[str, Any]] | None = None
 
 	# Retorna todos os movimentos não feitos considerando o tabuleiro atual
@@ -107,9 +57,9 @@ class MCTSNode:
 	# providenciando um coeficiente que representa o quão confiável é um nó. 
 	# Quanto maior esse coeficiente, mais confiável o nó é para escolha. 
 	def uct_value(self, c: float = 1.41) -> float:
-		if self.visits == 0:
-			return float('inf')
-		return self.wins / self.visits + c * math.sqrt(math.log(self.parent.visits) / self.visits)
+		# if self.visits == 0:
+		# 	return float('inf')
+		return self.wins / self.visits + c * sqrt(log(self.parent.visits) / self.visits)
 
 	# Seleciona o melhor nó filho com base na política de escolha de nós
 	def best_child(self, c: float = 1.41) -> MCTSNode:
@@ -121,7 +71,7 @@ class MCTSNode:
 		next_board: Board = Board(deepcopy(self.board.get_pieces()), color_up)
 		next_board.move_piece(move["piece_index"], move["position"])
 		next_turn: str = "B" if self.turn == "W" else "W"
-		child: MCTSNode = MCTSNode(next_board, next_turn, parent=self, move=move, depth=self.depth + 1)
+		child: MCTSNode = MCTSNode(next_board, next_turn, parent=self, move=move)
 		self.children.append(child)
 		return child
 
@@ -129,17 +79,10 @@ class AI:
 	def __init__(self, color: str) -> None:
 		# 'color' is the color this AI will play with (B or W)
 		self.color: str = color
-		self.minimax_stats: MinimaxStats = MinimaxStats()
-		self.mcts_stats: MCTSStats = MCTSStats()
 
 	# {Cython} (Minimax)
 	def minimax(self, current_board: Board, is_maximizing: bool, depth: int, turn: str) -> int:
 		# Tries to find recursively the best value depending on which player is passed as an argument to the function
-		self.minimax_stats.nodes_evaluated += 1
-		current_level: int = self.minimax_stats._initial_depth - depth
-		if current_level > self.minimax_stats.max_depth_reached:
-			self.minimax_stats.max_depth_reached = current_level
-
 		if depth == 0 or current_board.get_winner() is not None:
 			return self.get_value(current_board)
 
@@ -178,16 +121,11 @@ class AI:
 	# {Cython} (MCTS)
 	# Implementação do algoritmo Monte Carlo Tree Search, definindo um número padrão de iterações como 1000
 	def mcts(self, current_board: Board, n_iterations: int = 500) -> dict[str, Any]:
-		self.mcts_stats.reset()
-		start: float = time.time()
-
 		# Considera como nó raiz considerando o estado inicial do tabuleiro
 		root: MCTSNode = MCTSNode(deepcopy(current_board), self.color)
 		color_up: str = current_board.get_color_up()
 
 		for _ in range(n_iterations):
-			self.mcts_stats.iterations += 1
-
 			# Etapa de 'selection', desce pela árvore usando UCT (política de seleção de nós)
 			node: MCTSNode = root
 			while not node.is_terminal() and node.is_fully_expanded():
@@ -196,9 +134,6 @@ class AI:
 			# Etapa de 'expansion, adiciona um novo nó filho não explorado à árvore de escolhas
 			if not node.is_terminal() and not node.is_fully_expanded():
 				node = node.expand(color_up)
-				self.mcts_stats.nodes_created += 1
-				if node.depth > self.mcts_stats.max_tree_depth:
-					self.mcts_stats.max_tree_depth = node.depth
 
 			# Etapa de 'simulation', reproduz um jogo aleatório até chegar a um vencedor ou ao número limite de iterações definido na função
 			result: float = self._rollout(node, color_up)
@@ -208,9 +143,6 @@ class AI:
 
 		# Retorna o filho mais visitado (mais robusto que o com maior win rate)
 		best: MCTSNode = max(root.children, key=lambda n: n.visits)
-		self.mcts_stats.elapsed_time = time.time() - start
-		self.mcts_stats.best_move_visits = best.visits
-		self.mcts_stats.best_move_win_rate = best.wins / best.visits if best.visits > 0 else 0.0
 		return best.move
 
 	# {Cython} (MCTS)
@@ -271,7 +203,7 @@ class AI:
 			pieces: list[Piece] = current_board.get_pieces()
 			piece_from: Piece = pieces[move["piece_index"]]
 			move = {"position_to": move["position"], "position_from": piece_from.get_position()}
-			print(get_coloured_message("[MCTS] => Nova posição definida!"))
+			print(self.get_coloured_message("[MCTS] => Nova posição definida!"))
 			print(move)
 			return move
 		else:
@@ -315,7 +247,7 @@ class AI:
 			# Chooses a random move just in case there are more than one "good" move, then returns it properly.
 			move_chosen: dict[str, Any] = choice(best_moves)
 			move = {"position_to": move_chosen["move"]["position"], "position_from": player_pieces[move_chosen["piece"]].get_position()}
-			print(get_coloured_message("[Minimax] => Nova posição definida!"))
+			print(self.get_coloured_message("[Minimax] => Nova posição definida!"))
 			print(move)
 			return move
 

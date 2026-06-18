@@ -1,3 +1,5 @@
+from constants import AIEnum, ColorEnum
+
 def get_position_with_row_col(row, column):
     # Receives a piece's row and column positions and returns the (0-31) position on the board.
     # Position is calculated taking into consideration the fact that each leftmost dark square on the board is (row * 4).
@@ -33,3 +35,6 @@ def get_piece_gui_coords(coords, square_dist, top_left_coords):
 def get_surface_mouse_offset(surface_pos, mouse_pos):
     # Receives the position (x, y) of a surface and the mouse. Returns the offset used to determine where the surface was clicked.
     return (surface_pos[0] - mouse_pos[0], surface_pos[1] - mouse_pos[1])
+
+def get_coloured_message(msg:str, ai: AIEnum):
+		return f"{ColorEnum.GREEN_BACKGROUND}{ColorEnum.YELLOW_TEXT}{msg}{ColorEnum.RESET}" if self.actualAI == AIEnum.MCTS else f"{ColorEnum.BLUE_BACKGROUND}{ColorEnum.WHITE_TEXT}{msg}{ColorEnum.RESET}"

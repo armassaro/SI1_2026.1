@@ -2,18 +2,20 @@ from piece import Piece
 from board import Board
 from board_gui import BoardGUI
 from held_piece import HeldPiece
-from ai import AI
+from ai import AI, AIEnum
 from utils import get_surface_mouse_offset, get_piece_position
 
 # modificado para receber o algoritmo escolhido no menu
 class GameControl:
-    def __init__(self, player_color, is_computer_opponent, cpu_algoritmo):
+    def __init__(self, player_color, is_computer_opponent, cpu_algoritmo, human_mcts_enabled=False):
         self.turn = player_color
         self.winner = None
         self.board = None
         self.board_draw = None
         self.held_piece = None
         self.ai_control = None
+        self.human_mcts_enabled = human_mcts_enabled
+        self.human_mcts_ai = AI(player_color, AIEnum.MCTS) if human_mcts_enabled else None
 
         if is_computer_opponent:
             cpu_color = "B" if player_color == "W" else "W"
@@ -85,6 +87,9 @@ class GameControl:
 
         self.board_draw.hide_piece(piece_clicked["index"])
         self.set_held_piece(piece_clicked["index"], board_pieces[piece_clicked["index"]], mouse_pos)
+
+        if self.human_mcts_enabled:
+            return self.get_move_scores(piece_clicked["index"])
     
     def release_piece(self):
         if self.held_piece is None:
@@ -114,6 +119,12 @@ class GameControl:
         surface = self.board_draw.get_surface(piece)
         offset = get_surface_mouse_offset(self.board_draw.get_piece_by_index(index)["rect"], mouse_pos)
         self.held_piece = HeldPiece(surface, offset)
+
+    def get_move_scores(self, selected_piece_index, n_iterations=300):
+        if not self.human_mcts_enabled or self.human_mcts_ai is None:
+            return []
+
+        return self.human_mcts_ai.get_move_scores(self.board, selected_piece_index=selected_piece_index, n_iterations=n_iterations)
 
     def move_ai(self):
         # Gets best move from an AI instance and moves it.

@@ -214,6 +214,48 @@ class AI:
 		self.mcts_stats.best_move_win_rate = best.wins / best.visits if best.visits > 0 else 0.0
 		return best.move
 
+	def get_move_scores(self, current_board: Board, selected_piece_index: int | None = None, n_iterations: int = 300) -> list[dict[str, Any]]:
+		self.mcts_stats.reset()
+		start: float = time.time()
+
+		root: MCTSNode = MCTSNode(deepcopy(current_board), self.color)
+		color_up: str = current_board.get_color_up()
+
+		for _ in range(n_iterations):
+			self.mcts_stats.iterations += 1
+
+			node: MCTSNode = root
+			while not node.is_terminal() and node.is_fully_expanded():
+				node = node.best_child()
+
+			if not node.is_terminal() and not node.is_fully_expanded():
+				node = node.expand(color_up)
+				self.mcts_stats.nodes_created += 1
+				if node.depth > self.mcts_stats.max_tree_depth:
+					self.mcts_stats.max_tree_depth = node.depth
+
+			result: float = self._rollout(node, color_up)
+			self._backpropagate(node, result)
+
+		self.mcts_stats.elapsed_time = time.time() - start
+
+		scores: list[dict[str, Any]] = []
+		for child in root.children:
+			move = child.move
+			if move is None:
+				continue
+			if selected_piece_index is not None and move["piece_index"] != selected_piece_index:
+				continue
+			piece_pos = int(current_board.get_pieces()[move["piece_index"]].get_position())
+			scores.append({
+				"from": piece_pos,
+				"to": move["position"],
+				"win_rate": child.wins / child.visits if child.visits > 0 else 0.0,
+				"simulations": child.visits,
+			})
+
+		return sorted(scores, key=lambda item: (-item["win_rate"], -item["simulations"]))
+
 	# {Cython} (MCTS)
 	# Simula uma partida aleatória a partir do estado do nó recebido.
 	# Retorna 1.0 se a IA vencer, 0.0 se o oponente vencer, ou 0.5 se atingir o limite de passos sem vencedor.

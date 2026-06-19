@@ -63,6 +63,7 @@ def main():
 
     # Font setup
     main_font = pg.font.SysFont("Arial", 25)
+    status_font = pg.font.SysFont("Arial", 20)
     turn_rect = (509, 26)
     winner_rect = (509, 152)
     # move the back button slightly up and reduce height so it fits the window
@@ -88,11 +89,11 @@ def main():
 
 
         if game_control.get_winner() is not None:
-            winner_display_text = "White wins!" if game_control.get_winner() == "W" else "Black wins!"
-            DISPLAYSURF.blit(main_font.render(winner_display_text, True, (255, 255, 255)), turn_rect)
+            winner_display_text = "Vitória das brancas" if game_control.get_winner() == "W" else "Vitória das pretas"
+            DISPLAYSURF.blit(status_font.render(winner_display_text, True, (255, 255, 255)), turn_rect)
         else:
-            turn_display_text = "White's turn" if game_control.get_turn() == "W" else "Black's turn"
-            DISPLAYSURF.blit(main_font.render(turn_display_text, True, (255, 255, 255)), turn_rect)
+            turn_display_text = "Turno das brancas" if game_control.get_turn() == "W" else "Turno das pretas"
+            DISPLAYSURF.blit(status_font.render(turn_display_text, True, (255, 255, 255)), turn_rect)
 
         # Draw legenda button (small) above the back button only when MCTS human mode is active
         if stats_panel is not None:

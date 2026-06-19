@@ -37,4 +37,4 @@ def get_surface_mouse_offset(surface_pos, mouse_pos):
     return (surface_pos[0] - mouse_pos[0], surface_pos[1] - mouse_pos[1])
 
 def get_coloured_message(msg:str, ai: AIEnum):
-		return f"{ColorEnum.GREEN_BACKGROUND}{ColorEnum.YELLOW_TEXT}{msg}{ColorEnum.RESET}" if self.actualAI == AIEnum.MCTS else f"{ColorEnum.BLUE_BACKGROUND}{ColorEnum.WHITE_TEXT}{msg}{ColorEnum.RESET}"
+    return f"{ColorEnum.GREEN_BACKGROUND}{ColorEnum.YELLOW_TEXT}{msg}{ColorEnum.RESET}" if ai == AIEnum.MCTS else f"{ColorEnum.BLUE_BACKGROUND}{ColorEnum.WHITE_TEXT}{msg}{ColorEnum.RESET}"

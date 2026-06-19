@@ -26,7 +26,7 @@ class MinimaxStats:
 
 	def report(self) -> str:
 		return (
-			get_coloured_message(msg=f"[Minimax Stats] Nós avaliados: {self.nodes_evaluated}", ai=AIEnum.MCTS) +
+			get_coloured_message(msg=f"[Minimax Stats] Nós avaliados: {self.nodes_evaluated}", ai=AIEnum.minimax) +
 			f"Profundidade máxima: {self.max_depth_reached} | "
 			f"Melhor pontuação: {self.best_score} | "
 			f"Tempo: {self.elapsed_time:.4f}s"
@@ -126,9 +126,10 @@ class MCTSNode:
 		return child
 
 class AI:
-	def __init__(self, color: str) -> None:
+	def __init__(self, cpu_color: str, ai: AIEnum) -> None:
 		# 'color' is the color this AI will play with (B or W)
-		self.color: str = color
+		self.color: str = cpu_color
+		self.ai: AIEnum = ai
 		self.minimax_stats: MinimaxStats = MinimaxStats()
 		self.mcts_stats: MCTSStats = MCTSStats()
 
@@ -264,14 +265,14 @@ class AI:
 			node = node.parent
 
 	# Função que pega o próximo movimento da IA
-	def get_move(self, current_board: Board, ai: AIEnum) -> dict[str, int]:
-		if(ai == AIEnum.MCTS):
+	def get_move(self, current_board: Board) -> dict[str, int]:
+		if(self.ai == AIEnum.MCTS):
 			# Código que utiliza o MCTS
 			move: dict[str, Any] = self.mcts(current_board, n_iterations=2000)
 			pieces: list[Piece] = current_board.get_pieces()
 			piece_from: Piece = pieces[move["piece_index"]]
 			move = {"position_to": move["position"], "position_from": piece_from.get_position()}
-			print(get_coloured_message("[MCTS] => Nova posição definida!"))
+			print(get_coloured_message("[MCTS] => Nova posição definida!", self.ai))
 			print(move)
 			return move
 		else:
@@ -315,7 +316,7 @@ class AI:
 			# Chooses a random move just in case there are more than one "good" move, then returns it properly.
 			move_chosen: dict[str, Any] = choice(best_moves)
 			move = {"position_to": move_chosen["move"]["position"], "position_from": player_pieces[move_chosen["piece"]].get_position()}
-			print(get_coloured_message("[Minimax] => Nova posição definida!"))
+			print(get_coloured_message("[Minimax] => Nova posição definida!", self.ai))
 			print(move)
 			return move
 

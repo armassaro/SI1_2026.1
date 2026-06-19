@@ -25,20 +25,20 @@ def main():
         cpu_ativa = True
 
         if escolha["humano"] == "Sem MCTS" and escolha["cpu_algoritmo"] == "Minimax":
-            game_control = GameControl(PLAYER_COLOR, True, AIEnum.minimax)
+            game_control = GameControl(player_color=PLAYER_COLOR, is_computer_opponent=True, cpu_algoritmo=AIEnum.minimax)
 
         if escolha["humano"] == "Sem MCTS" and escolha["cpu_algoritmo"] == "MCTS":
-            game_control = GameControl(PLAYER_COLOR, True, AIEnum.MCTS)
+            game_control = GameControl(player_color=PLAYER_COLOR, is_computer_opponent=True, cpu_algoritmo=AIEnum.MCTS)
 
         if escolha["humano"] == "MCTS" and escolha["cpu_algoritmo"] == "Minimax":
             print("[AVISO] Humano com MCTS ainda não implementado.")
             print("        Rodando com Minimax padrão como fallback.")
-            game_control = GameControl(PLAYER_COLOR, True, AIEnum.minimax)
+            game_control = GameControl(player_color=PLAYER_COLOR, is_computer_opponent=True, cpu_algoritmo=AIEnum.minimax)
 
         if escolha["humano"] == "MCTS" and escolha["cpu_algoritmo"] == "MCTS":
             print("[AVISO] Humano com MCTS e CPU com MCTS ainda não implementado.")
             print("        Rodando com Minimax padrão como fallback.")
-            game_control = GameControl(PLAYER_COLOR, True, AIEnum.MCTS)
+            game_control = GameControl(player_color=PLAYER_COLOR, is_computer_opponent=True, cpu_algoritmo=AIEnum.MCTS)
 
         # Para rodar mesmo nao tendo implementado
         if game_control is None:

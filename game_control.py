@@ -2,9 +2,8 @@ from piece import Piece
 from board import Board
 from board_gui import BoardGUI
 from held_piece import HeldPiece
-from ai import AI, AIEnum
+from ai import AI
 from utils import get_surface_mouse_offset, get_piece_position
-from ai import AIEnum
 
 # modificado para receber o algoritmo escolhido no menu
 class GameControl:

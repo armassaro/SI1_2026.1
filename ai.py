@@ -94,7 +94,10 @@ class MCTSNode:
 		return jumps if jumps else moves
 
 	def is_terminal(self) -> bool:
-		return self.board.get_winner() is not None
+		if self.board.get_winner() is not None:
+			return True
+		# Player with no legal moves and no expanded children is stuck (loss)
+		return len(self.untried_moves()) == 0 and not self.children
 
 	def is_fully_expanded(self) -> bool:
 		return len(self.untried_moves()) == 0
@@ -327,7 +330,8 @@ class MCTSAI:
 			moves = jumps if jumps else moves
 
 			if not moves:
-				break
+				# Current player is stuck — they lose
+				return 0.0 if turn == self.color else 1.0
 
 			chosen: tuple[int, int, bool] = choice(moves)
 			board.move_piece(chosen[0], chosen[1])

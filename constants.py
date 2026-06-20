@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Final
 
 # Cores utilizadas para os prints de mensagem do Minimax e MCTS
 class ColorEnum(Enum):
@@ -13,13 +14,16 @@ class AIEnum(Enum):
 	MCTS='MCTS',
 	minimax='Minimax'
       
-BOARD = [
-    [" ", "B", " ", "B", " ", "B", " ", "B"],
-    ["B", " ", "B", " ", "B", " ", "B", " "],
-    [" ", "B", " ", "B", " ", "B", " ", "B"],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    [" ", " ", " ", " ", " ", " ", " ", " "],
-    ["W", " ", "W", " ", "W", " ", "W", " "],
-    [" ", "W", " ", "W", " ", "W", " ", "W"],
-    ["W", " ", "W", " ", "W", " ", "W", " "],
-]
+EXEC_PARAMS:Final = {
+    # Habilita a execução dos módulos pré-compilados em linguagem C
+    "cython": True,
+    # Habilita a execução de simulações simultâneas
+    "threaded_simulations": True,
+    # Determina a quantidade de threads para execução de simulações simultâneas, só possui efeito se 'threaded_simulations' estiver como True
+    "max_threaded_simulations": 8,
+    # Parâmetros específicos da execução do MCTS
+    "mcts": {
+        # Coeficiente de cálculo da política de seleção de nós
+        "c": 1.41
+    }
+}

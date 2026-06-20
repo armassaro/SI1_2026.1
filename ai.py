@@ -26,7 +26,7 @@ class MinimaxStats:
 
 	def report(self) -> str:
 		return (
-			get_coloured_message(msg=f"[Minimax Stats] Nós avaliados: {self.nodes_evaluated}", ai=AIEnum.minimax) +
+			get_coloured_message(msg="[Minimax Stats] Nós avaliados: {self.nodes_evaluated}", ai=AIEnum.minimax) +
 			f"Profundidade máxima: {self.max_depth_reached} | "
 			f"Melhor pontuação: {self.best_score} | "
 			f"Tempo: {self.elapsed_time:.4f}s"
@@ -100,10 +100,10 @@ class MCTSNode:
 	def is_fully_expanded(self) -> bool:
 		return len(self.untried_moves()) == 0
 
-	def uct_value(self, c: float = 1.41) -> float:
+	def uct_value(self) -> float:
 		if self.visits == 0:
 			return float('inf')
-		return self.wins / self.visits + c * math.sqrt(math.log(self.parent.visits) / self.visits)
+		return self.wins / self.visits + EXEC_PARAMS["mcts"]["c"] * math.sqrt(math.log(self.parent.visits) / self.visits)
 
 	def best_child(self, c: float = 1.41) -> MCTSNode:
 		return max(self.children, key=lambda n: n.uct_value(c))

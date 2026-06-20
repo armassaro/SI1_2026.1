@@ -1,12 +1,10 @@
 from utils import get_position_with_row_col
-from constants import BOARD
 
 class Board:
     def __init__(self, pieces, color_up):
         # Example: [Piece('12WND'), Piece('14BNU'), Piece('24WYD')]
         self.pieces = pieces
         self.color_up = color_up # Defines which of the colors is moving up
-        self.board = BOARD
 
     def get_color_up(self):
         return self.color_up

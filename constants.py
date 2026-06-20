@@ -21,9 +21,22 @@ EXEC_PARAMS:Final = {
     "threaded_simulations": True,
     # Determina a quantidade de threads para execução de simulações simultâneas, só possui efeito se 'threaded_simulations' estiver como True
     "max_threaded_simulations": 8,
-    # Parâmetros específicos da execução do MCTS
+    # Parâmetros específicos da execução do MCTS (CPU)
     "mcts": {
         # Coeficiente de cálculo da política de seleção de nós
-        "c": 1.41
+        "c": 1.41,
+        # Quantidade máxima de nós iterados na árvore de escolhas MCTS
+        "n_iterations": 250,
+        # Quantidade máxima de nós expandidos por nó pai
+        "max_steps": 32
+    },
+    # Parâmetros espeacíficos da execução do MCTS auxiliar
+    "human_mcts": {
+        # Coeficiente de cálculo da política de seleção de nós
+        "c": 1.41,
+        # Quantidade máxima de nós iterados na árvore de escolhas MCTS
+        "n_iterations": 500,
+        # Quantidade máxima de nós expandidos por nó pai
+        "max_steps": 64
     }
 }

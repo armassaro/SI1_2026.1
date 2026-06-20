@@ -4,6 +4,7 @@ from board_gui import BoardGUI
 from held_piece import HeldPiece
 from ai import MinimaxAI, MCTSAI, AIEnum
 from utils import get_surface_mouse_offset, get_piece_position
+from constants import EXEC_PARAMS
 
 # modificado para receber o algoritmo escolhido no menu
 class GameControl:
@@ -15,11 +16,11 @@ class GameControl:
         self.held_piece = None
         self.ai_control = None
         self.human_mcts_enabled = human_mcts_enabled
-        self.human_mcts_ai = MCTSAI(player_color) if human_mcts_enabled else None
+        self.human_mcts_ai = MCTSAI(player_color, n_iterations=EXEC_PARAMS["human_mcts"]["n_iterations"], max_steps=EXEC_PARAMS["human_mcts"]["max_steps"], c=EXEC_PARAMS["human_mcts"]["c"]) if human_mcts_enabled else None
 
         if is_computer_opponent:
             cpu_color = "B" if player_color == "W" else "W"
-            self.ai_control = MCTSAI(cpu_color) if cpu_algoritmo == AIEnum.MCTS else MinimaxAI(cpu_color)
+            self.ai_control = MCTSAI(cpu_color, n_iterations=EXEC_PARAMS["mcts"]["n_iterations"], max_steps=EXEC_PARAMS["mcts"]["max_steps"], c=EXEC_PARAMS["mcts"]["c"]) if cpu_algoritmo == AIEnum.MCTS else MinimaxAI(cpu_color)
 
         self.setup()
 
@@ -89,7 +90,7 @@ class GameControl:
         self.set_held_piece(piece_clicked["index"], board_pieces[piece_clicked["index"]], mouse_pos)
 
         if self.human_mcts_enabled:
-            return self.get_move_scores(piece_clicked["index"])
+            return self.get_move_scores(piece_clicked["index"], n_iterations=EXEC_PARAMS["human_mcts"]["n_iterations"])
     
     def release_piece(self):
         if self.held_piece is None:
@@ -120,7 +121,7 @@ class GameControl:
         offset = get_surface_mouse_offset(self.board_draw.get_piece_by_index(index)["rect"], mouse_pos)
         self.held_piece = HeldPiece(surface, offset)
 
-    def get_move_scores(self, selected_piece_index, n_iterations=300):
+    def get_move_scores(self, selected_piece_index, n_iterations=EXEC_PARAMS["human_mcts"]["n_iterations"]):
         if not self.human_mcts_enabled or self.human_mcts_ai is None:
             return []
 

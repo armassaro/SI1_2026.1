@@ -32,7 +32,6 @@ class MinimaxStats:
 			f"Tempo: {self.elapsed_time:.4f}s"
 		)
 
-
 class MCTSStats:
 	def __init__(self) -> None:
 		self.iterations: int = 0
@@ -100,10 +99,10 @@ class MCTSNode:
 	def is_fully_expanded(self) -> bool:
 		return len(self.untried_moves()) == 0
 
-	def uct_value(self) -> float:
+	def uct_value(self, c:float) -> float:
 		if self.visits == 0:
 			return float('inf')
-		return self.wins / self.visits + EXEC_PARAMS["mcts"]["c"] * math.sqrt(math.log(self.parent.visits) / self.visits)
+		return self.wins / self.visits + c * math.sqrt(math.log(self.parent.visits) / self.visits)
 
 	def best_child(self, c: float = 1.41) -> MCTSNode:
 		return max(self.children, key=lambda n: n.uct_value(c))
@@ -222,18 +221,21 @@ class MinimaxAI:
 
 
 class MCTSAI:
-	def __init__(self, cpu_color: str) -> None:
+	def __init__(self, cpu_color: str, n_iterations: int = 500, max_steps: int = 64, c:float=1.41) -> None:
 		self.color: str = cpu_color
+		self.n_iterations: int = n_iterations
+		self.max_steps: int = max_steps
 		self.stats: MCTSStats = MCTSStats()
+		self.c: float = c
 
-	def mcts(self, current_board: Board, n_iterations: int = 500) -> dict[str, Any]:
+	def mcts(self, current_board: Board) -> dict[str, Any]:
 		self.stats.reset()
 		start: float = time.time()
 
 		root: MCTSNode = MCTSNode(deepcopy(current_board), self.color)
 		color_up: str = current_board.get_color_up()
 
-		for _ in range(n_iterations):
+		for _ in range(self.n_iterations):
 			self.stats.iterations += 1
 
 			node: MCTSNode = root
@@ -255,14 +257,14 @@ class MCTSAI:
 		self.stats.best_move_win_rate = best.wins / best.visits if best.visits > 0 else 0.0
 		return best.move
 
-	def get_move_scores(self, current_board: Board, selected_piece_index: int | None = None, n_iterations: int = 300) -> list[dict[str, Any]]:
+	def get_move_scores(self, current_board: Board, selected_piece_index: int | None = None) -> list[dict[str, Any]]:
 		self.stats.reset()
 		start: float = time.time()
 
 		root: MCTSNode = MCTSNode(deepcopy(current_board), self.color)
 		color_up: str = current_board.get_color_up()
 
-		for _ in range(n_iterations):
+		for _ in range(self.n_iterations):
 			self.stats.iterations += 1
 
 			node: MCTSNode = root
@@ -298,7 +300,7 @@ class MCTSAI:
 		return sorted(scores, key=lambda item: (-item["win_rate"], -item["simulations"]))
 
 	def get_move(self, current_board: Board) -> dict[str, int]:
-		move: dict[str, Any] = self.mcts(current_board, n_iterations=2000)
+		move: dict[str, Any] = self.mcts(current_board)
 		pieces: list[Piece] = current_board.get_pieces()
 		piece_from: Piece = pieces[move["piece_index"]]
 		move = {"position_to": move["position"], "position_from": piece_from.get_position()}
@@ -306,11 +308,11 @@ class MCTSAI:
 		print(move)
 		return move
 
-	def _rollout(self, node: MCTSNode, color_up: str, max_steps: int = 64) -> float:
+	def _rollout(self, node: MCTSNode, color_up: str) -> float:
 		board: Board = Board(deepcopy(node.board.get_pieces()), color_up)
 		turn: str = node.turn
 
-		for _ in range(max_steps):
+		for _ in range(self.max_steps):
 			winner: str | None = board.get_winner()
 			if winner is not None:
 				return 1.0 if winner == self.color else 0.0

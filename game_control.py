@@ -2,7 +2,7 @@ from piece import Piece
 from board import Board
 from board_gui import BoardGUI
 from held_piece import HeldPiece
-from ai import AI, AIEnum
+from ai import MinimaxAI, MCTSAI, AIEnum
 from utils import get_surface_mouse_offset, get_piece_position
 
 # modificado para receber o algoritmo escolhido no menu
@@ -15,11 +15,11 @@ class GameControl:
         self.held_piece = None
         self.ai_control = None
         self.human_mcts_enabled = human_mcts_enabled
-        self.human_mcts_ai = AI(player_color, AIEnum.MCTS) if human_mcts_enabled else None
+        self.human_mcts_ai = MCTSAI(player_color) if human_mcts_enabled else None
 
         if is_computer_opponent:
             cpu_color = "B" if player_color == "W" else "W"
-            self.ai_control = AI(cpu_color, cpu_algoritmo)
+            self.ai_control = MCTSAI(cpu_color) if cpu_algoritmo == AIEnum.MCTS else MinimaxAI(cpu_color)
 
         self.setup()
 

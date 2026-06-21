@@ -105,15 +105,17 @@ class Board:
         # then the piece is eating another piece.
         if abs(old_position[0] - new_position[1]) != 1:
             # self.pieces = np.delete(self.pieces, get_eaten_index(old_position, new_position))
-            eaten_index:list[int,int] = get_eaten_index(new_position)
+            eaten_index:list[int,int] = self.get_eaten_index(new_position)
+            eaten_piece:str = self.pieces[eaten_index[0]][eaten_index[1]]
             # Adiciona a informação de captura de peça na string de movimentos
             move_str += f"{self.pieces[eaten_index[0]][eaten_index[1]]}"
             # Some com a peça
             self.pieces[eaten_index[0]][eaten_index[1]] = ""
-            # Não entendi porque salvar essa informação, ent vou só comentar aqui
-            # piece_to_move.set_has_eaten(True)
-        # else:
-            # piece_to_move.set_has_eaten(False)
+            if eaten_piece == 'w' or eaten_piece == 'k':
+                self.white_pieces -= 1
+            else: 
+                self.black_pieces -= 1
+            
 
         # Turn piece into a king if it reaches the other side of the board
         if is_king_movement(piece_to_move):

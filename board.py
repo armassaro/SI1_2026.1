@@ -1,140 +1,123 @@
-from utils import get_position_with_row_col
+from __future__ import annotations
+import numpy as np
+from constants import BOARD
+
 
 class Board:
-    def __init__(self, pieces, color_up):
-        # Example: [Piece('12WND'), Piece('14BNU'), Piece('24WYD')]
-        self.pieces = pieces
-        self.color_up = color_up # Defines which of the colors is moving up
+    def __init__(self, color_up: str, pieces=None, moves: list[str] | None = None) -> None:
+        self.pieces: np.ndarray = np.array(pieces if pieces is not None else BOARD, dtype="U1")
+        self.color_up: str = color_up
+        self.moves: list[str] = moves if moves is not None else []
+        self.white_pieces: int = int(np.sum((self.pieces == 'w') | (self.pieces == 'k')))
+        self.black_pieces: int = int(np.sum((self.pieces == 'B') | (self.pieces == 'K')))
 
-    def get_color_up(self):
+    def get_color_up(self) -> str:
         return self.color_up
 
-    def get_pieces(self):
-        return self.pieces
+    def get_pieces(self) -> list[tuple[int, int]]:
+        rows, cols = np.where(self.pieces != ' ')
+        return list(zip(rows.tolist(), cols.tolist()))
 
-    def get_piece_by_index(self, index):
-        return self.pieces[index]
+    def get_piece_by_index(self, row: int, col: int) -> str:
+        return self.pieces[row, col]
 
-    def has_piece(self, position) -> bool:
-        # Receives position (e.g.: 28), returns True if there's a piece in that position
-        string_pos = str(position)
+    def has_piece(self, row: int, col: int) -> bool:
+        return self.pieces[row, col] != ' '
 
-        for piece in self.pieces:
-            if piece.get_position() == string_pos:
-                return True
+    def get_color_at(self, row: int, col: int) -> str:
+        return 'W' if self.pieces[row, col] in ('w', 'k') else 'B'
 
-        return False
-    
-    def get_row_number(self, position):
-        # Receives position (e.g.: 1), returns the row this position is on the board.
-        return position // 4
-    
-    def get_col_number(self, position):
-        # There are four dark squares on each row where pieces can be placed.
-        # The remainder of (position / 4) can be used to determine which of the four squares has the position.
-        # We also take into account that odd rows on the board have a offset of 1 column.
-        remainder = position % 4
-        column_position = remainder * 2 # because the squares have a gap of one light square.
-        is_row_odd = not (self.get_row_number(position) % 2 == 0)
-        return column_position + 1 if is_row_odd else column_position
-    
-    def get_row(self, row_number):
-        # Receives a row number, returns a set with all pieces contained in it.
-        # [0, 1, 2, 3] represents the first row of the board. All rows contain four squares.
-        # row_pos needs to contain strings on it because Piece.get_position() returns a number in type string.
+    def is_king_at(self, row: int, col: int) -> bool:
+        return self.pieces[row, col] in ('k', 'K')
 
-        row_pos = [0, 1, 2, 3]
-        row_pos = list(map((lambda pos: str(pos + (4 * row_number))), row_pos))
-        row = []
+    @staticmethod
+    def row_col_from_pos(pos: int) -> tuple[int, int]:
+        row = pos // 4
+        col = (pos % 4) * 2 + (1 if row % 2 != 0 else 0)
+        return (row, col)
 
-        for piece in self.pieces:
-            if piece.get_position() in row_pos:
-                row.append(piece)
+    @staticmethod
+    def pos_from_row_col(row: int, col: int) -> int:
+        return row * 4 + col // 2
 
-        return set(row)
-    
-    def get_pieces_by_coords(self, *coords):
-        # Receives a variable number of (row, column) pairs.
-        # Returns a ordered list of same length with a Piece if found, otherwise None.
-        row_memory = dict() # Used to not have to keep calling get_row().
-        results = []
+    def get_moves(self, row: int, col: int) -> list[dict]:
+        ch = self.pieces[row, col]
+        if ch == ' ':
+            return []
+        is_white = ch in ('w', 'k')
+        is_king = ch in ('k', 'K')
+        # White pieces move toward row 0, black toward row 7
+        forward = -1 if is_white else 1
+        dirs = [(-1, -1), (-1, 1), (1, -1), (1, 1)] if is_king else [(forward, -1), (forward, 1)]
 
-        for coord_pair in coords:
-            if coord_pair[0] in row_memory:
-                current_row = row_memory[coord_pair[0]]
+        jumps, normals = [], []
+        for dr, dc in dirs:
+            nr, nc = row + dr, col + dc
+            if not (0 <= nr < 8 and 0 <= nc < 8):
+                continue
+            target = self.pieces[nr, nc]
+            if target == ' ':
+                normals.append({"to_row": nr, "to_col": nc, "eats_piece": False})
+            elif (is_white and target in ('B', 'K')) or (not is_white and target in ('w', 'k')):
+                lr, lc = row + 2 * dr, col + 2 * dc
+                if 0 <= lr < 8 and 0 <= lc < 8 and self.pieces[lr, lc] == ' ':
+                    jumps.append({"to_row": lr, "to_col": lc, "eats_piece": True})
+
+        return jumps if jumps else normals
+
+    def move_piece(self, from_row: int, from_col: int, to_row: int, to_col: int) -> None:
+        ch = self.pieces[from_row, from_col]
+        move_str = f"{ch}{from_row}{from_col}"
+
+        if abs(to_row - from_row) == 2:
+            eaten_row = (from_row + to_row) // 2
+            eaten_col = (from_col + to_col) // 2
+            eaten_ch = self.pieces[eaten_row, eaten_col]
+            move_str += eaten_ch
+            self.pieces[eaten_row, eaten_col] = ' '
+            if eaten_ch in ('w', 'k'):
+                self.white_pieces -= 1
             else:
-                current_row = self.get_row(coord_pair[0])
-                row_memory[coord_pair[0]] = current_row
-            
-            for piece in current_row:
-                if self.get_col_number(int(piece.get_position())) == coord_pair[1]:
-                    results.append(piece)
-                    break
+                self.black_pieces -= 1
+
+        if ch == 'w' and to_row == 0:
+            ch = 'k'
+        elif ch == 'B' and to_row == 7:
+            ch = 'K'
+
+        self.pieces[to_row, to_col] = ch
+        self.pieces[from_row, from_col] = ' '
+        self.moves.append(f"{move_str}{ch}{to_row}{to_col}")
+
+    def undo_last_move(self) -> None:
+        if not self.moves:
+            return
+        last = self.moves.pop()
+        original_ch = last[0]
+        from_row, from_col = int(last[1]), int(last[2])
+
+        if len(last) == 6:
+            # No capture: {ch}{fr}{fc}{ch_after}{tr}{tc}
+            to_row, to_col = int(last[4]), int(last[5])
+            self.pieces[from_row, from_col] = original_ch
+            self.pieces[to_row, to_col] = ' '
+        else:
+            # Capture: {ch}{fr}{fc}{eaten_ch}{ch_after}{tr}{tc}
+            eaten_ch = last[3]
+            to_row, to_col = int(last[5]), int(last[6])
+            self.pieces[from_row, from_col] = original_ch
+            self.pieces[to_row, to_col] = ' '
+            eaten_row = (from_row + to_row) // 2
+            eaten_col = (from_col + to_col) // 2
+            self.pieces[eaten_row, eaten_col] = eaten_ch
+            if eaten_ch in ('w', 'k'):
+                self.white_pieces += 1
             else:
-                # This runs if 'break' isn't called on the for loop above.
-                results.append(None)
-        
-        return results
-    
-    def move_piece(self, moved_index, new_position) -> None:
-        def is_eat_movement(current_position) -> int:
-            # If the difference in the rows of the current and next positions isn't 1, i.e. if the piece isn't moving one square, 
-            # then the piece is eating another piece.
-            return abs(self.get_row_number(current_position) - self.get_row_number(new_position)) != 1
+                self.black_pieces += 1
 
-        def get_eaten_index(current_position) -> int:
-            current_coords = [self.get_row_number(current_position), self.get_col_number(current_position)]
-            new_coords = [self.get_row_number(new_position), self.get_col_number(new_position)]
-            eaten_coords = [current_coords[0], current_coords[1]]
-
-            # Dividing by 2 because neither the current position or the new one is desired, but the one in the middle.
-            # Getting the difference between the new coordinates and current coordinates helps getting the direction.
-            eaten_coords[0] += (new_coords[0] - current_coords[0]) // 2
-            eaten_coords[1] += (new_coords[1] - current_coords[1]) // 2
-
-            # Converting to string to compare later.
-            eaten_position = str(get_position_with_row_col(eaten_coords[0], eaten_coords[1]))
-
-            for index, piece in enumerate(self.pieces):
-                if piece.get_position() == eaten_position:
-                    return index
-
-        def is_king_movement(piece):
-            # Receives the piece moving and returns True if the move turns that piece into a king.
-            if piece.is_king():
-                return False
-            end_row = self.get_row_number(new_position)
-            piece_color = piece.get_color()
-            king_row = 0 if self.color_up == piece_color else 7
-            return end_row == king_row
-
-        piece_to_move = self.pieces[moved_index]
-
-        # Delete piece from the board if this move eats another piece
-        if is_eat_movement(int(piece_to_move.get_position())):
-            self.pieces.pop(get_eaten_index(int(piece_to_move.get_position()))) 
-            piece_to_move.set_has_eaten(True)
-        else:
-            piece_to_move.set_has_eaten(False)
-
-        # Turn piece into a king if it reaches the other side of the board
-        if is_king_movement(piece_to_move):
-            piece_to_move.set_is_king(True)
-
-        # Actually move
-        piece_to_move.set_position(new_position)
-    
-    def get_winner(self):
-        # Returns the winning color or None if no player has won yet
-        current_color = self.pieces[0].get_color()
-
-        for piece in self.pieces:
-            if piece.get_color() != current_color:
-                break
-        else:
-            return current_color
-        
+    def get_winner(self) -> str | None:
+        if self.white_pieces <= 0:
+            return 'B'
+        if self.black_pieces <= 0:
+            return 'W'
         return None
-    
-    def get_board(self):
-        return self.board

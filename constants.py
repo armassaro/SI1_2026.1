@@ -14,6 +14,17 @@ class AIEnum(Enum):
 	MCTS='MCTS',
 	minimax='Minimax'
       
+BOARD = [
+    ["B", " ", "B", " ", "B", " ", "B", " "],
+    [" ", "B", " ", "B", " ", "B", " ", "B"],
+    ["B", " ", "B", " ", "B", " ", "B", " "],
+    [" ", " ", " ", " ", " ", " ", " ", " "],
+    [" ", " ", " ", " ", " ", " ", " ", " "],
+    [" ", "w", " ", "w", " ", "w", " ", "w"],
+    ["w", " ", "w", " ", "w", " ", "w", " "],
+    [" ", "w", " ", "w", " ", "w", " ", "w"],
+]
+      
 EXEC_PARAMS:Final = {
     # Habilita a execução dos módulos pré-compilados em linguagem C
     "cython": True,
@@ -26,9 +37,9 @@ EXEC_PARAMS:Final = {
         # Coeficiente de cálculo da política de seleção de nós
         "c": 1.41,
         # Quantidade máxima de nós iterados na árvore de escolhas MCTS
-        "n_iterations": 250,
+        "n_iterations": 2000,
         # Quantidade máxima de nós expandidos por nó pai
-        "max_steps": 32
+        "max_steps": 128
     },
     # Parâmetros espeacíficos da execução do MCTS auxiliar
     "human_mcts": {

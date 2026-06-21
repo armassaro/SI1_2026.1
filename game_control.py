@@ -1,155 +1,137 @@
-from piece import Piece
+from __future__ import annotations
 from board import Board
 from board_gui import BoardGUI
 from held_piece import HeldPiece
 from ai import MinimaxAI, MCTSAI, AIEnum
-from utils import get_surface_mouse_offset, get_piece_position
+from utils import get_surface_mouse_offset
 from constants import EXEC_PARAMS
 
-# modificado para receber o algoritmo escolhido no menu
 class GameControl:
-    def __init__(self, player_color, is_computer_opponent, cpu_algoritmo, human_mcts_enabled=False):
-        self.turn = player_color
-        self.winner = None
-        self.board = None
-        self.board_draw = None
-        self.held_piece = None
-        self.ai_control = None
-        self.human_mcts_enabled = human_mcts_enabled
-        self.human_mcts_ai = MCTSAI(player_color, n_iterations=EXEC_PARAMS["human_mcts"]["n_iterations"], max_steps=EXEC_PARAMS["human_mcts"]["max_steps"], c=EXEC_PARAMS["human_mcts"]["c"]) if human_mcts_enabled else None
+    def __init__(self, player_color: str, is_computer_opponent: bool, cpu_algoritmo: AIEnum, human_mcts_enabled: bool = False) -> None:
+        self.turn: str = player_color
+        self.winner: str | None = None
+        self.board: Board | None = None
+        self.board_draw: BoardGUI | None = None
+        self.held_piece: HeldPiece | None = None
+        self.ai_control: MinimaxAI | MCTSAI | None = None
+        self.human_mcts_enabled: bool = human_mcts_enabled
+        self.human_mcts_ai: MCTSAI | None = (
+            MCTSAI(player_color, n_iterations=EXEC_PARAMS["human_mcts"]["n_iterations"],
+                   max_steps=EXEC_PARAMS["human_mcts"]["max_steps"], c=EXEC_PARAMS["human_mcts"]["c"])
+            if human_mcts_enabled else None
+        )
 
         if is_computer_opponent:
-            cpu_color = "B" if player_color == "W" else "W"
-            self.ai_control = MCTSAI(cpu_color, n_iterations=EXEC_PARAMS["mcts"]["n_iterations"], max_steps=EXEC_PARAMS["mcts"]["max_steps"], c=EXEC_PARAMS["mcts"]["c"]) if cpu_algoritmo == AIEnum.MCTS else MinimaxAI(cpu_color)
+            cpu_color: str = "B" if player_color == "W" else "W"
+            self.ai_control = (
+                MCTSAI(cpu_color, n_iterations=EXEC_PARAMS["mcts"]["n_iterations"],
+                       max_steps=EXEC_PARAMS["mcts"]["max_steps"], c=EXEC_PARAMS["mcts"]["c"])
+                if cpu_algoritmo == AIEnum.MCTS else MinimaxAI(cpu_color)
+            )
 
         self.setup()
 
-    def get_turn(self):
+    def get_turn(self) -> str:
         return self.turn
 
-    def get_winner(self):
+    def get_winner(self) -> str | None:
         return self.winner
 
-    def setup(self):
-        # Initial setup
-        pieces = []
-
-        for opponent_piece in range(0, 12):
-            pieces.append(Piece(str(opponent_piece) + 'BN'))
-        
-        for player_piece in range(20, 32):
-            pieces.append(Piece(str(player_piece) + 'WN'))
-        
-        self.board = Board(pieces, self.turn)
+    def setup(self) -> None:
+        self.board = Board(self.turn)
         self.board_draw = BoardGUI(self.board)
-    
-    def draw_screen(self, display_surface):
+
+    def draw_screen(self, display_surface: object) -> None:
         self.board_draw.draw_board(display_surface)
         self.board_draw.draw_pieces(display_surface)
-
         if self.held_piece is not None:
             self.held_piece.draw_piece(display_surface)
 
-    def hold_piece(self, mouse_pos):
+    def hold_piece(self, mouse_pos: tuple[int, int]) -> list | None:
         piece_clicked = self.board_draw.get_piece_on_mouse(mouse_pos)
-        board_pieces = self.board.get_pieces()
-        has_jump_restraint = False # True if any piece can jump in one of its moves, forcing the player to jump
+        if piece_clicked is None or piece_clicked["color"] != self.turn:
+            return
 
-        if piece_clicked is None:
-            return
-        
-        if piece_clicked["piece"]["color"] != self.turn:
-            return
-        
-        # Determines if player has a jump restraint
-        for piece in board_pieces:
-            for move in piece.get_moves(self.board):
-                if move["eats_piece"]:
-                    if piece.get_color() == piece_clicked["piece"]["color"]:
-                        has_jump_restraint = True
-            else:
-                continue
-            break
-        
-        piece_moves = board_pieces[piece_clicked["index"]].get_moves(self.board)
+        from_row, from_col = piece_clicked["row"], piece_clicked["col"]
+        piece_moves: list[dict] = self.board.get_moves(from_row, from_col)
+
+        has_jump_restraint: bool = any(
+            m["eats_piece"]
+            for r, c in self.board.get_pieces()
+            if self.board.get_color_at(r, c) == self.turn
+            for m in self.board.get_moves(r, c)
+        )
 
         if has_jump_restraint:
-            piece_moves = list(filter(lambda move: move["eats_piece"] == True, piece_moves))
+            piece_moves = [m for m in piece_moves if m["eats_piece"]]
 
-        move_marks = []
+        if not piece_moves:
+            return
 
-        # Gets possible moving positions and tells BoardGUI to draw them
-        for possible_move in piece_moves:
-            row = self.board.get_row_number(int(possible_move["position"]))
-            column = self.board.get_col_number(int(possible_move["position"]))
-            move_marks.append((row, column))
-
-        self.board_draw.set_move_marks(move_marks)
-
-        self.board_draw.hide_piece(piece_clicked["index"])
-        self.set_held_piece(piece_clicked["index"], board_pieces[piece_clicked["index"]], mouse_pos)
+        self.board_draw.set_move_marks([(m["to_row"], m["to_col"]) for m in piece_moves])
+        self.board_draw.hide_piece(from_row, from_col)
+        self._set_held_piece(from_row, from_col, mouse_pos)
 
         if self.human_mcts_enabled:
-            return self.get_move_scores(piece_clicked["index"], n_iterations=EXEC_PARAMS["human_mcts"]["n_iterations"])
-    
-    def release_piece(self):
+            return self.get_move_scores(from_row, from_col)
+
+    def release_piece(self) -> None:
         if self.held_piece is None:
             return
 
         position_released = self.held_piece.check_collision(self.board_draw.get_move_marks())
-        moved_index = self.board_draw.show_piece()
-        piece_moved = self.board.get_piece_by_index(moved_index)
+        from_rc: tuple[int, int] | None = self.board_draw.show_piece()
 
-        # Only moves the piece if dropped in a proper move mark        
-        if position_released is not None:
-            self.board.move_piece(moved_index, self.board_draw.get_position_by_rect(position_released))
+        if position_released is not None and from_rc is not None:
+            from_row, from_col = from_rc
+            to_row, to_col = self.board_draw.get_position_by_rect(position_released)
+            self.board.move_piece(from_row, from_col, to_row, to_col)
             self.board_draw.set_pieces(self.board_draw.get_piece_properties(self.board))
             self.winner = self.board.get_winner()
 
-            # Check if player can eat another piece, granting an extra turn.
-            jump_moves = list(filter(lambda move: move["eats_piece"] == True, piece_moved.get_moves(self.board)))
-            
-            if len(jump_moves) == 0 or piece_moved.get_has_eaten() == False:
+            was_eating: bool = abs(to_row - from_row) == 2
+            can_eat_again: bool = any(m["eats_piece"] for m in self.board.get_moves(to_row, to_col))
+
+            if not (was_eating and can_eat_again):
                 self.turn = "B" if self.turn == "W" else "W"
 
         self.held_piece = None
         self.board_draw.set_move_marks([])
 
-    def set_held_piece(self, index, piece, mouse_pos):
-        # Creates a HeldPiece object to follow the mouse
-        surface = self.board_draw.get_surface(piece)
-        offset = get_surface_mouse_offset(self.board_draw.get_piece_by_index(index)["rect"], mouse_pos)
+    def _set_held_piece(self, row: int, col: int, mouse_pos: tuple[int, int]) -> None:
+        surface = self.board_draw.get_surface(row, col)
+        rect = self.board_draw.get_piece_rect(row, col)
+        offset = get_surface_mouse_offset((rect.x, rect.y), mouse_pos)
         self.held_piece = HeldPiece(surface, offset)
 
-    def get_move_scores(self, selected_piece_index, n_iterations=EXEC_PARAMS["human_mcts"]["n_iterations"]):
+    def get_move_scores(self, row: int, col: int, n_iterations: int = EXEC_PARAMS["human_mcts"]["n_iterations"]) -> list:
         if not self.human_mcts_enabled or self.human_mcts_ai is None:
             return []
+        piece_index = next(
+            (i for i, (r, c) in enumerate(self.board.get_pieces()) if r == row and c == col),
+            None
+        )
+        if piece_index is None:
+            return []
+        return self.human_mcts_ai.get_move_scores(self.board, selected_piece_index=piece_index, n_iterations=n_iterations)
 
-        return self.human_mcts_ai.get_move_scores(self.board, selected_piece_index=selected_piece_index, n_iterations=n_iterations)
-
-    def move_ai(self):
-        # Gets best move from an AI instance and moves it.
-        if self.turn == "W":
+    def move_ai(self) -> None:
+        if self.turn == "W" or self.ai_control is None:
             return
 
-        optimal_move = self.ai_control.get_move(self.board)
-        index_moved = -1
-        piece_moved = None
+        optimal_move: dict = self.ai_control.get_move(self.board)
 
-        for index, piece in enumerate(self.board.get_pieces()):
-            if piece.get_position() == optimal_move["position_from"]:
-                index_moved = index
-                piece_moved = piece
-                break
-        else:
-            raise RuntimeError("AI was supposed to return a move from an existing piece but found none.")
-        
-        self.board.move_piece(index_moved, int(optimal_move["position_to"]))
+        from_pos: int = int(optimal_move["position_from"])
+        to_pos: int = int(optimal_move["position_to"])
+        from_row, from_col = Board.row_col_from_pos(from_pos)
+        to_row, to_col = Board.row_col_from_pos(to_pos)
+
+        self.board.move_piece(from_row, from_col, to_row, to_col)
         self.board_draw.set_pieces(self.board_draw.get_piece_properties(self.board))
         self.winner = self.board.get_winner()
 
-        # Check if AI can eat another piece, granting an extra turn.
-        jump_moves = list(filter(lambda move: move["eats_piece"] == True, piece_moved.get_moves(self.board)))
+        was_eating: bool = abs(to_row - from_row) == 2
+        can_eat_again: bool = any(m["eats_piece"] for m in self.board.get_moves(to_row, to_col))
 
-        if len(jump_moves) == 0 or piece_moved.get_has_eaten() == False:
+        if not (was_eating and can_eat_again):
             self.turn = "B" if self.turn == "W" else "W"

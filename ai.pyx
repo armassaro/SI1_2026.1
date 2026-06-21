@@ -7,7 +7,7 @@ import time
 import numpy as np
 from constants import AIEnum
 from utils import get_coloured_message
-from constants import EXEC_PARAMS
+
 
 class MinimaxStats:
     def __init__(self) -> None:
@@ -196,8 +196,7 @@ class MinimaxAI:
             "position_to": Board.pos_from_row_col(chosen["to_row"], chosen["to_col"]),
         }
         print(get_coloured_message("[Minimax] => Nova posição definida!", AIEnum.minimax))
-        print(f"Posição antiga: {move.from_row},{move.from_col}")
-        print(f"Posição nova: {move.to_row},{move.to_col}")
+        print(result)
         return result
 
     def get_value(self, board: Board) -> int:
@@ -213,6 +212,7 @@ class MinimaxAI:
         if player == opp:
             return 0
         return 1 if player > opp else -1
+
 
 class MCTSAI:
     def __init__(self, cpu_color: str, n_iterations: int = 500, max_steps: int = 64, c: float = 1.41) -> None:
@@ -230,7 +230,7 @@ class MCTSAI:
             self.stats.iterations += 1
             node = root
             while not node.is_terminal() and node.is_fully_expanded():
-                node = node.best_child(EXEC_PARAMS["mcts"]["c"])
+                node = node.best_child(self.c)
 
             if not node.is_terminal() and not node.is_fully_expanded():
                 node = node.expand(color_up)
@@ -289,8 +289,7 @@ class MCTSAI:
             "position_to": Board.pos_from_row_col(move["to_row"], move["to_col"]),
         }
         print(get_coloured_message("[MCTS] => Nova posição definida!", AIEnum.MCTS))
-        print(f"Posição antiga: {move.from_row},{move.from_col}")
-        print(f"Posição nova: {move.to_row},{move.to_col}")
+        print(result)
         return result
 
     def _rollout(self, node: MCTSNode, color_up: str) -> float:

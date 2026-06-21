@@ -37,9 +37,9 @@ EXEC_PARAMS:Final = {
         # Coeficiente de cálculo da política de seleção de nós
         "c": 1.41,
         # Quantidade máxima de nós iterados na árvore de escolhas MCTS
-        "n_iterations": 1000,
+        "n_iterations": 2000,
         # Quantidade máxima de nós expandidos por nó pai
-        "max_steps": 64
+        "max_steps": 128
     },
     # Parâmetros espeacíficos da execução do MCTS auxiliar
     "human_mcts": {

@@ -1,27 +1,23 @@
 from constants import AIEnum, ColorEnum
 
-def get_position_with_row_col(row: int, column: int) -> int:
-    return (row * 4) + (column // 2)
-
-def get_piece_position(coords: tuple[int, int], square_dist: int, top_left_coords: tuple[int, int]) -> int:
-    col = (coords[0] - top_left_coords[0]) // square_dist
-    row = (coords[1] - top_left_coords[1]) // square_dist
-    return get_position_with_row_col(row, col)
 
 def get_piece_rc(coords: tuple[int, int], square_dist: int, top_left_coords: tuple[int, int]) -> tuple[int, int]:
     col = (coords[0] - top_left_coords[0]) // square_dist
     row = (coords[1] - top_left_coords[1]) // square_dist
     return (row, col)
 
+
 def get_piece_gui_coords(coords: tuple[int, int], square_dist: int, top_left_coords: tuple[int, int]) -> tuple[int, int]:
-    piece_row, piece_column = coords[0], coords[1]
-    x_pos = top_left_coords[0] + (square_dist * 2 * (piece_column // 2))
+    piece_row, piece_col = coords[0], coords[1]
+    x_pos = top_left_coords[0] + (square_dist * 2 * (piece_col // 2))
     x_pos = x_pos if piece_row % 2 == 0 else x_pos + square_dist
     y_pos = top_left_coords[1] + (square_dist * piece_row)
     return (x_pos, y_pos)
 
+
 def get_surface_mouse_offset(surface_pos: tuple[int, int], mouse_pos: tuple[int, int]) -> tuple[int, int]:
     return (surface_pos[0] - mouse_pos[0], surface_pos[1] - mouse_pos[1])
+
 
 def get_coloured_message(msg: str, ai: AIEnum) -> str:
     if ai == AIEnum.MCTS:

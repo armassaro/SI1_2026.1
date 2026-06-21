@@ -7,7 +7,8 @@ import time
 import numpy as np
 from constants import AIEnum
 from utils import get_coloured_message
-
+from constants import EXEC_PARAMS
+from concurrent.futures import ThreadPoolExecutor
 
 class MinimaxStats:
     def __init__(self) -> None:
@@ -214,7 +215,6 @@ class MinimaxAI:
             return 0
         return 1 if player > opp else -1
 
-
 class MCTSAI:
     def __init__(self, cpu_color: str, n_iterations: int = 500, max_steps: int = 64, c: float = 1.41) -> None:
         self.color: str = cpu_color
@@ -231,7 +231,7 @@ class MCTSAI:
             self.stats.iterations += 1
             node = root
             while not node.is_terminal() and node.is_fully_expanded():
-                node = node.best_child(self.c)
+                node = node.best_child(EXEC_PARAMS["mcts"]["c"])
 
             if not node.is_terminal() and not node.is_fully_expanded():
                 node = node.expand(color_up)
@@ -245,7 +245,9 @@ class MCTSAI:
         return root
 
     def mcts(self, current_board: Board) -> dict[str, Any]:
+        # Reseta as estatísticas
         self.stats.reset()
+        # Define o primeiro timestamp
         start = time.time()
         root = self._run_mcts(current_board, self.n_iterations)
         best = max(root.children, key=lambda n: n.visits)

@@ -6,6 +6,7 @@ from random import choice
 from typing import Any
 import math
 import time
+import numpy as np
 from constants import *
 from utils import get_coloured_message
 
@@ -66,7 +67,6 @@ class MCTSStats:
 			f"Tempo: {self.elapsed_time:.4f}s"
 		)
 
-
 class MCTSNode:
 	def __init__(self, board: Board, turn: str, parent: MCTSNode | None = None, move: dict[str, Any] | None = None, depth: int = 0) -> None:
 		self.board: Board = board
@@ -112,13 +112,13 @@ class MCTSNode:
 
 	def expand(self, color_up: str) -> MCTSNode:
 		move: dict[str, Any] = self.untried_moves().pop()
-		next_board: Board = Board(deepcopy(self.board.get_pieces()), color_up)
+		next_board = Board(memoryview(self.board.get_pieces()), color_up)
+		# next_board: Board = Board(deepcopy(self.board.get_pieces()), color_up)
 		next_board.move_piece(move["piece_index"], move["position"])
 		next_turn: str = "B" if self.turn == "W" else "W"
 		child: MCTSNode = MCTSNode(next_board, next_turn, parent=self, move=move, depth=self.depth + 1)
 		self.children.append(child)
 		return child
-
 
 class MinimaxAI:
 	def __init__(self, cpu_color: str) -> None:
@@ -136,7 +136,7 @@ class MinimaxAI:
 
 		next_turn: str = 'B' if turn == 'W' else 'W'
 		board_color_up: str = current_board.get_color_up()
-		current_pieces: list[Piece] = current_board.get_pieces()
+		current_pieces: np.ndarray = current_board.get_pieces()
 		piece_moves: list[list[dict[str, Any]] | bool] = list(map(lambda piece: piece.get_moves(current_board) if piece.get_color() == turn else False, current_pieces))
 
 		if is_maximizing:
@@ -166,7 +166,7 @@ class MinimaxAI:
 
 	def get_move(self, current_board: Board) -> dict[str, int]:
 		board_color_up: str = current_board.get_color_up()
-		current_pieces: list[Piece] = current_board.get_pieces()
+		current_pieces: np.ndarray = current_board.get_pieces()
 		next_turn: str = "W" if self.color == "B" else "B"
 		player_pieces: list[Piece | bool] = list(map(lambda piece: piece if piece.get_color() == self.color else False, current_pieces))
 		possible_moves: list[dict[str, Any]] = []
@@ -205,7 +205,7 @@ class MinimaxAI:
 		return move
 
 	def get_value(self, board: Board) -> int:
-		board_pieces: list[Piece] = board.get_pieces()
+		board_pieces: np.ndarray = board.get_pieces()
 
 		if board.get_winner() is not None:
 			if board_pieces[0].get_color() == self.color:
@@ -304,7 +304,7 @@ class MCTSAI:
 
 	def get_move(self, current_board: Board) -> dict[str, int]:
 		move: dict[str, Any] = self.mcts(current_board)
-		pieces: list[Piece] = current_board.get_pieces()
+		pieces: np.ndarray = current_board.get_pieces()
 		piece_from: Piece = pieces[move["piece_index"]]
 		move = {"position_to": move["position"], "position_from": piece_from.get_position()}
 		print(get_coloured_message("[MCTS] => Nova posição definida!", AIEnum.MCTS))

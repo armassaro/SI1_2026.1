@@ -59,6 +59,20 @@ class GameControl:
             if self.no_capture_count >= self.NO_CAPTURE_LIMIT and self.winner is None:
                 self.winner = "empate"
 
+    # verificar se o jogador da vez tem movimentos disponiveis; se nao tiver, declarar o adversario vencedor
+    def _verificar_sem_movimentos(self) -> None:
+        if self.winner is not None:
+            return
+
+        tem_movimento_disponivel: bool = any(
+            self.board.get_moves(r, c)
+            for r, c in self.board.get_pieces()
+            if self.board.get_color_at(r, c) == self.turn
+        )
+
+        if not tem_movimento_disponivel:
+            self.winner = "B" if self.turn == "W" else "W"
+
     def setup(self) -> None:
         self.board = Board(self.turn)
         self.board_draw = BoardGUI(self.board)
@@ -117,6 +131,7 @@ class GameControl:
 
             if not (was_eating and can_eat_again):
                 self.turn = "B" if self.turn == "W" else "W"
+                self._verificar_sem_movimentos()
 
         self.held_piece = None
         self.board_draw.set_move_marks([])
@@ -159,6 +174,7 @@ class GameControl:
 
         if not (was_eating and can_eat_again):
             self.turn = "B" if self.turn == "W" else "W"
+            self._verificar_sem_movimentos()
 
     def move_ai_cpu_vs_cpu(self) -> None:
         if self.winner is not None:
@@ -182,3 +198,4 @@ class GameControl:
 
         if not (was_eating and can_eat_again):
             self.turn = "B" if self.turn == "W" else "W"
+            self._verificar_sem_movimentos()

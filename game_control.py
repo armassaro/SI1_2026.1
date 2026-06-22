@@ -7,9 +7,11 @@ from utils import get_surface_mouse_offset
 from constants import EXEC_PARAMS
 
 class GameControl:
-    def __init__(self, player_color: str, is_computer_opponent: bool, cpu_algoritmo: AIEnum, human_mcts_enabled: bool = False) -> None:
+    def __init__(self, player_color: str, is_computer_opponent: bool, cpu_algoritmo: AIEnum, human_mcts_enabled: bool = False, cpu_vs_cpu: bool = False) -> None:
         self.turn: str = player_color
         self.winner: str | None = None
+        self.no_capture_count: int = 0
+        self.NO_CAPTURE_LIMIT: int = 50
         self.board: Board | None = None
         self.board_draw: BoardGUI | None = None
         self.held_piece: HeldPiece | None = None
@@ -20,6 +22,9 @@ class GameControl:
                    max_steps=EXEC_PARAMS["human_mcts"]["max_steps"], c=EXEC_PARAMS["human_mcts"]["c"])
             if human_mcts_enabled else None
         )
+        self.cpu_vs_cpu: bool = cpu_vs_cpu
+        self.ai_pretas: MinimaxAI | None = None
+        self.ai_brancas: MCTSAI | None = None
 
         if is_computer_opponent:
             cpu_color: str = "B" if player_color == "W" else "W"
@@ -27,6 +32,14 @@ class GameControl:
                 MCTSAI(cpu_color, n_iterations=EXEC_PARAMS["mcts"]["n_iterations"],
                        max_steps=EXEC_PARAMS["mcts"]["max_steps"], c=EXEC_PARAMS["mcts"]["c"])
                 if cpu_algoritmo == AIEnum.MCTS else MinimaxAI(cpu_color)
+            )
+        elif cpu_vs_cpu:
+            self.ai_pretas = MinimaxAI("B")
+            self.ai_brancas = MCTSAI(
+                "W",
+                n_iterations=EXEC_PARAMS["mcts"]["n_iterations"],
+                max_steps=EXEC_PARAMS["mcts"]["max_steps"],
+                c=EXEC_PARAMS["mcts"]["c"]
             )
 
         self.setup()
@@ -36,6 +49,15 @@ class GameControl:
 
     def get_winner(self) -> str | None:
         return self.winner
+
+    # Esse método é chamado após cada jogada, para atualizar o contador de jogadas sem captura e verificar se a partida deve ser declarada empate.
+    def _registrar_resultado_jogada(self, was_eating: bool) -> None:
+        if was_eating:
+            self.no_capture_count = 0
+        else:
+            self.no_capture_count += 1
+            if self.no_capture_count >= self.NO_CAPTURE_LIMIT and self.winner is None:
+                self.winner = "empate"
 
     def setup(self) -> None:
         self.board = Board(self.turn)
@@ -91,6 +113,7 @@ class GameControl:
 
             was_eating: bool = abs(to_row - from_row) == 2
             can_eat_again: bool = any(m["eats_piece"] for m in self.board.get_moves(to_row, to_col))
+            self._registrar_resultado_jogada(was_eating)
 
             if not (was_eating and can_eat_again):
                 self.turn = "B" if self.turn == "W" else "W"
@@ -132,6 +155,30 @@ class GameControl:
 
         was_eating: bool = abs(to_row - from_row) == 2
         can_eat_again: bool = any(m["eats_piece"] for m in self.board.get_moves(to_row, to_col))
+        self._registrar_resultado_jogada(was_eating)
+
+        if not (was_eating and can_eat_again):
+            self.turn = "B" if self.turn == "W" else "W"
+
+    def move_ai_cpu_vs_cpu(self) -> None:
+        if self.winner is not None:
+            return
+
+        ai_atual: MinimaxAI | MCTSAI = self.ai_pretas if self.turn == "B" else self.ai_brancas
+        optimal_move: dict = ai_atual.get_move(self.board)
+
+        from_pos: int = int(optimal_move["position_from"])
+        to_pos: int = int(optimal_move["position_to"])
+        from_row, from_col = Board.row_col_from_pos(from_pos)
+        to_row, to_col = Board.row_col_from_pos(to_pos)
+
+        self.board.move_piece(from_row, from_col, to_row, to_col)
+        self.board_draw.set_pieces(self.board_draw.get_piece_properties(self.board))
+        self.winner = self.board.get_winner()
+
+        was_eating: bool = abs(to_row - from_row) == 2
+        can_eat_again: bool = any(m["eats_piece"] for m in self.board.get_moves(to_row, to_col))
+        self._registrar_resultado_jogada(was_eating)
 
         if not (was_eating and can_eat_again):
             self.turn = "B" if self.turn == "W" else "W"

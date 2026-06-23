@@ -5,7 +5,7 @@ from pygame.locals import *
 from board_gui import BoardGUI
 from game_control import GameControl
 from menu import mostrar_menu
-from ai import AIEnum
+from constants import AIEnum
 from stats_panel import StatsPanel
 
 PLAYER_COLOR = "W"

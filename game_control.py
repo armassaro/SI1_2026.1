@@ -1,10 +1,15 @@
 from __future__ import annotations
+from constants import EXEC_PARAMS
 from board import Board
 from board_gui import BoardGUI
 from held_piece import HeldPiece
-from ai import MinimaxAI, MCTSAI, AIEnum
+if EXEC_PARAMS["cython"]:
+    from cyai import MinimaxAI, MCTSAI, AIEnum
+    print("Utilizando Cython!")
+else:
+    from ai import MinimaxAI, MCTSAI, AIEnum
+
 from utils import get_surface_mouse_offset
-from constants import EXEC_PARAMS
 
 class GameControl:
     def __init__(self, player_color: str, is_computer_opponent: bool, cpu_algoritmo: AIEnum, human_mcts_enabled: bool = False, cpu_vs_cpu: bool = False) -> None:

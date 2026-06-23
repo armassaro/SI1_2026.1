@@ -84,3 +84,60 @@ class StatsPanel:
             self.surface.blit(hint, (12, 40))
 
         display_surface.blit(self.surface, self.PANEL_RECT.topleft)
+
+
+class AIStatsPanel:
+    BG = (20, 22, 38)
+    MINIMAX_COLOR = (255, 185, 70)
+    MCTS_COLOR = (90, 205, 255)
+    TEXT_COLOR = (215, 215, 215)
+    # cpu_vs_cpu mode: two sections side by side
+    CPU_VS_CPU_RECT = pygame.Rect(509, 50, 185, 118)
+    # single AI mode: one section
+    SINGLE_RECT = pygame.Rect(509, 50, 185, 54)
+
+    _TITLE_H = 19
+    _LINE_H = 15
+
+    def __init__(self) -> None:
+        self._title_font = pygame.font.SysFont("Arial", 13, bold=True)
+        self._line_font = pygame.font.SysFont("Arial", 11)
+        self.minimax_snap: dict | None = None
+        self.mcts_snap: dict | None = None
+
+    def update_minimax(self, snap: dict | None) -> None:
+        self.minimax_snap = snap
+
+    def update_mcts(self, snap: dict | None) -> None:
+        self.mcts_snap = snap
+
+    def _draw_section(self, surf: pygame.Surface, x: int, y: int, w: int,
+                      title: str, color: tuple, lines: list[str]) -> int:
+        h = self._TITLE_H + len(lines) * self._LINE_H + 4
+        pygame.draw.rect(surf, self.BG, (x, y, w, h))
+        pygame.draw.rect(surf, color, (x, y, w, h), 1)
+        surf.blit(self._title_font.render(title, True, color), (x + 4, y + 3))
+        for i, line in enumerate(lines):
+            surf.blit(self._line_font.render(line, True, self.TEXT_COLOR),
+                      (x + 4, y + self._TITLE_H + i * self._LINE_H))
+        return h
+
+    def draw(self, display_surface: pygame.Surface, rect: pygame.Rect) -> None:
+        x, y, w = rect.x, rect.y, rect.width
+
+        if self.minimax_snap:
+            s = self.minimax_snap
+            lines = [
+                f"Nós: {s['nodes_evaluated']}  Prof: {s['max_depth_reached']}  Score: {s['best_score']}",
+                f"Tempo: {s['elapsed_time']:.3f}s",
+            ]
+            h = self._draw_section(display_surface, x, y, w, "Minimax (Pretas)", self.MINIMAX_COLOR, lines)
+            y += h + 4
+
+        if self.mcts_snap:
+            s = self.mcts_snap
+            lines = [
+                f"Iter: {s['iterations']}  Nós: {s['nodes_created']}  Prof: {s['max_tree_depth']}",
+                f"WR: {s['best_move_win_rate']:.1%} | Vis: {s['best_move_visits']} | T: {s['elapsed_time']:.3f}s",
+            ]
+            self._draw_section(display_surface, x, y, w, "MCTS (Brancas)", self.MCTS_COLOR, lines)

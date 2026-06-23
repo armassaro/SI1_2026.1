@@ -1,0 +1,12 @@
+Simulação de Partidas — 2026-06-23 10:40:14
+Partidas solicitadas: 2  |  Concluídas: 2
+
+Minimax (Pretas) venceu: 0  (0.0%)
+MCTS   (Brancas) venceu: 1  (50.0%)
+Empates:                 1  (50.0%)
+
+Média de jogadas por partida: 105.5
+
+--- Detalhes por partida ---
+  Partida   1: Empate                 | 91 jogadas
+  Partida   2: MCTS (Brancas)         | 120 jogadas

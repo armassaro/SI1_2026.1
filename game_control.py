@@ -1,4 +1,6 @@
 from __future__ import annotations
+import datetime
+import os
 from constants import EXEC_PARAMS
 from board import Board
 from board_gui import BoardGUI
@@ -16,7 +18,7 @@ class GameControl:
         self.turn: str = player_color
         self.winner: str | None = None
         self.no_capture_count: int = 0
-        self.NO_CAPTURE_LIMIT: int = 50
+        self.NO_CAPTURE_LIMIT: int = EXEC_PARAMS["no_capture_limit"]
         self.board: Board | None = None
         self.board_draw: BoardGUI | None = None
         self.held_piece: HeldPiece | None = None
@@ -30,6 +32,10 @@ class GameControl:
         self.cpu_vs_cpu: bool = cpu_vs_cpu
         self.ai_pretas: MinimaxAI | None = None
         self.ai_brancas: MCTSAI | None = None
+        self.move_log: list[dict] = []
+        self.last_minimax_snap: dict | None = None
+        self.last_mcts_snap: dict | None = None
+        self._log_written: bool = False
 
         if is_computer_opponent:
             cpu_color: str = "B" if player_color == "W" else "W"
@@ -54,6 +60,67 @@ class GameControl:
 
     def get_winner(self) -> str | None:
         return self.winner
+
+    def get_last_minimax_snap(self) -> dict | None:
+        return self.last_minimax_snap
+
+    def get_last_mcts_snap(self) -> dict | None:
+        return self.last_mcts_snap
+
+    @staticmethod
+    def _snap_minimax(ai) -> dict:
+        s = ai.stats
+        return {
+            'nodes_evaluated': s.nodes_evaluated,
+            'max_depth_reached': s.max_depth_reached,
+            'elapsed_time': s.elapsed_time,
+            'best_score': s.best_score,
+        }
+
+    @staticmethod
+    def _snap_mcts(ai) -> dict:
+        s = ai.stats
+        return {
+            'iterations': s.iterations,
+            'nodes_created': s.nodes_created,
+            'max_tree_depth': s.max_tree_depth,
+            'elapsed_time': s.elapsed_time,
+            'best_move_visits': s.best_move_visits,
+            'best_move_win_rate': s.best_move_win_rate,
+            'avg_rollout_steps': s.avg_rollout_steps,
+            'nodes_reused': s.nodes_reused,
+        }
+
+    def write_game_log(self) -> None:
+        if self._log_written:
+            return
+        self._log_written = True
+        os.makedirs("log", exist_ok=True)
+        ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        filename = f"log/game_{ts}.log"
+        winner_map = {'W': 'Brancas venceram', 'B': 'Pretas venceram', 'empate': 'Empate'}
+        winner_text = winner_map.get(self.winner or '', f'desconhecido ({self.winner})')
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(f"Jogo de Damas — {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"Resultado: {winner_text}\n")
+            f.write(f"Total de jogadas: {len(self.move_log)}\n\n")
+            for i, entry in enumerate(self.move_log, 1):
+                f.write(f"--- Jogada {i} ({entry['color']}) ---\n")
+                if 'minimax' in entry:
+                    s = entry['minimax']
+                    f.write(
+                        f"  [Minimax] Nós: {s['nodes_evaluated']} | Prof.: {s['max_depth_reached']} | "
+                        f"Score: {s['best_score']} | Tempo: {s['elapsed_time']:.4f}s\n"
+                    )
+                if 'mcts' in entry:
+                    s = entry['mcts']
+                    f.write(
+                        f"  [MCTS] Iterações: {s['iterations']} | Nós criados: {s['nodes_created']} | "
+                        f"Prof. máx: {s['max_tree_depth']} | Visitas ao melhor: {s['best_move_visits']} | "
+                        f"WR: {s['best_move_win_rate']:.2%} | Média passos/rollout: {s['avg_rollout_steps']:.1f} | "
+                        f"Reutilizados: {s['nodes_reused']} | Tempo: {s['elapsed_time']:.4f}s\n"
+                    )
+            f.write(f"\nFim de jogo. Resultado: {winner_text}\n")
 
     # Esse método é chamado após cada jogada, para atualizar o contador de jogadas sem captura e verificar se a partida deve ser declarada empate.
     def _registrar_resultado_jogada(self, was_eating: bool) -> None:
@@ -162,7 +229,17 @@ class GameControl:
         if self.turn == "W" or self.ai_control is None:
             return
 
+        turn_color = self.turn
         optimal_move: dict = self.ai_control.get_move(self.board)
+
+        if type(self.ai_control).__name__ == 'MinimaxAI':
+            snap = self._snap_minimax(self.ai_control)
+            self.last_minimax_snap = snap
+            self.move_log.append({'color': turn_color, 'minimax': snap})
+        else:
+            snap = self._snap_mcts(self.ai_control)
+            self.last_mcts_snap = snap
+            self.move_log.append({'color': turn_color, 'mcts': snap})
 
         from_pos: int = int(optimal_move["position_from"])
         to_pos: int = int(optimal_move["position_to"])
@@ -185,8 +262,18 @@ class GameControl:
         if self.winner is not None:
             return
 
-        ai_atual: MinimaxAI | MCTSAI = self.ai_pretas if self.turn == "B" else self.ai_brancas
+        turn_color = self.turn
+        ai_atual: MinimaxAI | MCTSAI = self.ai_pretas if turn_color == "B" else self.ai_brancas
         optimal_move: dict = ai_atual.get_move(self.board)
+
+        if turn_color == "B":
+            snap = self._snap_minimax(ai_atual)
+            self.last_minimax_snap = snap
+            self.move_log.append({'color': turn_color, 'minimax': snap})
+        else:
+            snap = self._snap_mcts(ai_atual)
+            self.last_mcts_snap = snap
+            self.move_log.append({'color': turn_color, 'mcts': snap})
 
         from_pos: int = int(optimal_move["position_from"])
         to_pos: int = int(optimal_move["position_to"])

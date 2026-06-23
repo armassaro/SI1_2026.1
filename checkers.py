@@ -6,7 +6,7 @@ from board_gui import BoardGUI
 from game_control import GameControl
 from menu import mostrar_menu
 from constants import AIEnum
-from stats_panel import StatsPanel
+from stats_panel import StatsPanel, AIStatsPanel
 
 PLAYER_COLOR = "W"
 
@@ -20,6 +20,7 @@ def criar_game_control_e_stats(escolha: dict) -> tuple:
     """
     game_control = None
     stats_panel = None
+    ai_stats_panel = None
     cpu_ativa = False
     eh_cpu_vs_cpu = False
 
@@ -31,13 +32,16 @@ def criar_game_control_e_stats(escolha: dict) -> tuple:
 
         if human_mcts_selected:
             stats_panel = StatsPanel()
+        else:
+            ai_stats_panel = AIStatsPanel()
 
     elif escolha["modo"] == "cpu_vs_cpu":
         cpu_ativa = True
         eh_cpu_vs_cpu = True
         game_control = GameControl(player_color=PLAYER_COLOR, is_computer_opponent=False, cpu_algoritmo=AIEnum.minimax, cpu_vs_cpu=True)
+        ai_stats_panel = AIStatsPanel()
 
-    return game_control, stats_panel, cpu_ativa, eh_cpu_vs_cpu
+    return game_control, stats_panel, ai_stats_panel, cpu_ativa, eh_cpu_vs_cpu
 
 
 def _desenhar_tela_simulacao(display, main_font, small_font, partidas_concluidas, quantidade_partidas, barra_rect, botao_cancelar) -> None:
@@ -99,6 +103,27 @@ def _desenhar_tela_resultado_simulacao(display, main_font, small_font, resultado
     display.blit(texto_voltar, texto_voltar.get_rect(center=botao_voltar.center))
 
 
+def _write_simulation_summary(start_ts: str, resultados: dict, concluidas: int, total: int, game_logs: list[dict]) -> None:
+    import os
+    import datetime
+    os.makedirs("log", exist_ok=True)
+    filename = f"log/simulation_{start_ts}.log"
+    total_real = max(concluidas, 1)
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(f"Simulação de Partidas — {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"Partidas solicitadas: {total}  |  Concluídas: {concluidas}\n\n")
+        f.write(f"Minimax (Pretas) venceu: {resultados['B']}  ({resultados['B'] / total_real * 100:.1f}%)\n")
+        f.write(f"MCTS   (Brancas) venceu: {resultados['W']}  ({resultados['W'] / total_real * 100:.1f}%)\n")
+        f.write(f"Empates:                 {resultados['empate']}  ({resultados['empate'] / total_real * 100:.1f}%)\n\n")
+        if game_logs:
+            avg_moves = sum(g['moves'] for g in game_logs) / len(game_logs)
+            f.write(f"Média de jogadas por partida: {avg_moves:.1f}\n\n")
+            f.write("--- Detalhes por partida ---\n")
+            winner_map = {'W': 'MCTS (Brancas)', 'B': 'Minimax (Pretas)', 'empate': 'Empate', None: '?'}
+            for i, g in enumerate(game_logs, 1):
+                f.write(f"  Partida {i:>3}: {winner_map.get(g['winner'], g['winner']):<22} | {g['moves']} jogadas\n")
+
+
 def executar_simulacao(DISPLAYSURF, fps_clock, FPS, quantidade_partidas: int) -> None:
     main_font = pg.font.SysFont("Arial", 24)
     small_font = pg.font.SysFont("Arial", 16)
@@ -141,9 +166,12 @@ def executar_simulacao(DISPLAYSURF, fps_clock, FPS, quantidade_partidas: int) ->
             fps_clock.tick(FPS)
         return
 
+    sim_start_ts = __import__('datetime').datetime.now().strftime("%Y%m%d_%H%M%S")
+    sim_game_logs: list[dict] = []
+
     for _ in range(quantidade_partidas):
         gc = GameControl(player_color=PLAYER_COLOR, is_computer_opponent=False, cpu_algoritmo=AIEnum.minimax, cpu_vs_cpu=True)
-        
+
         while gc.get_winner() is None and not cancelado:
             gc.move_ai_cpu_vs_cpu()
 
@@ -159,12 +187,17 @@ def executar_simulacao(DISPLAYSURF, fps_clock, FPS, quantidade_partidas: int) ->
             fps_clock.tick(FPS)
 
         if cancelado:
+            gc.write_game_log()
             break
 
         vencedor = gc.get_winner()
+        gc.write_game_log()
+        sim_game_logs.append({'winner': vencedor, 'moves': len(gc.move_log)})
         if vencedor in resultados:
             resultados[vencedor] += 1
         partidas_concluidas += 1
+
+    _write_simulation_summary(sim_start_ts, resultados, partidas_concluidas, quantidade_partidas, sim_game_logs)
 
     aguardando = True
     while aguardando:
@@ -212,10 +245,11 @@ def main():
             escolha = mostrar_menu()
             continue
 
-        game_control, stats_panel, cpu_ativa, eh_cpu_vs_cpu = criar_game_control_e_stats(escolha)
+        game_control, stats_panel, ai_stats_panel, cpu_ativa, eh_cpu_vs_cpu = criar_game_control_e_stats(escolha)
         legend_visible = False
         autoplay_ativo = False
         proximo_horario_jogada = 0
+        log_escrito = False
 
         rodando_partida = True
         while rodando_partida:
@@ -227,7 +261,14 @@ def main():
             if stats_panel is not None:
                 stats_panel.draw(DISPLAYSURF)
 
+            if ai_stats_panel is not None:
+                panel_rect = AIStatsPanel.CPU_VS_CPU_RECT if eh_cpu_vs_cpu else AIStatsPanel.SINGLE_RECT
+                ai_stats_panel.draw(DISPLAYSURF, panel_rect)
+
             if game_control.get_winner() is not None:
+                if not log_escrito:
+                    game_control.write_game_log()
+                    log_escrito = True
                 if game_control.get_winner() == "empate":
                     DISPLAYSURF.blit(status_font.render("Empate", True, (255, 255, 255)), turn_rect)
                     texto_explicacao = small_font.render("(50 jogadas sem captura)", True, (255, 255, 255))
@@ -327,6 +368,9 @@ def main():
                                 proximo_horario_jogada = pg.time.get_ticks() + AUTOPLAY_DELAY
                         elif botao_prox_jogada.collidepoint(event.pos) and not autoplay_ativo:
                             game_control.move_ai_cpu_vs_cpu()
+                            if ai_stats_panel is not None:
+                                ai_stats_panel.update_minimax(game_control.get_last_minimax_snap())
+                                ai_stats_panel.update_mcts(game_control.get_last_mcts_snap())
 
                     elif stats_panel is not None and legend_button.collidepoint(event.pos):
                         legend_visible = True
@@ -354,18 +398,27 @@ def main():
                     if game_control.get_winner() is not None:
                         continue
                     game_control.move_ai()
+                    if ai_stats_panel is not None:
+                        ai_stats_panel.update_minimax(game_control.get_last_minimax_snap())
+                        ai_stats_panel.update_mcts(game_control.get_last_mcts_snap())
                     if game_control.get_turn() == PLAYER_COLOR:
                         pg.time.set_timer(USEREVENT, 0)
 
             if eh_cpu_vs_cpu and autoplay_ativo and game_control.get_winner() is None:
                 if pg.time.get_ticks() >= proximo_horario_jogada:
                     game_control.move_ai_cpu_vs_cpu()
+                    if ai_stats_panel is not None:
+                        ai_stats_panel.update_minimax(game_control.get_last_minimax_snap())
+                        ai_stats_panel.update_mcts(game_control.get_last_mcts_snap())
                     if game_control.get_winner() is not None:
                         autoplay_ativo = False
                     proximo_horario_jogada = pg.time.get_ticks() + AUTOPLAY_DELAY
 
             if voltar_ao_menu:
                 pg.time.set_timer(USEREVENT, 0)
+                if not log_escrito and len(game_control.move_log) > 0:
+                    game_control.write_game_log()
+                    log_escrito = True
                 rodando_partida = False
 
             pg.display.update()

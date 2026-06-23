@@ -4,7 +4,7 @@ def mostrar_menu():
     pygame.init()
     pygame.display.set_caption('Menu Inicial')
 
-    janela = pygame.display.set_mode((700, 500))
+    janela = pygame.display.set_mode((720, 500))
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("Arial", 30)
     font_menor = pygame.font.SysFont("Arial", 15)

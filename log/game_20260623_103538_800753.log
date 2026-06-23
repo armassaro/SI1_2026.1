@@ -1,0 +1,188 @@
+Jogo de Damas — 2026-06-23 10:35:38
+Resultado: Empate
+Total de jogadas: 91
+
+--- Jogada 1 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 8 | Visitas ao melhor: 418 | WR: 55.26% | Média passos/rollout: 0.0 | Reutilizados: 0 | Tempo: 3.3231s
+--- Jogada 2 (B) ---
+  [Minimax] Nós: 82470 | Prof.: 9 | Score: 0 | Tempo: 1.8110s
+--- Jogada 3 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 12 | Visitas ao melhor: 481 | WR: 55.93% | Média passos/rollout: 0.0 | Reutilizados: 55 | Tempo: 2.8896s
+--- Jogada 4 (B) ---
+  [Minimax] Nós: 67972 | Prof.: 9 | Score: 0 | Tempo: 1.1419s
+--- Jogada 5 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 15 | Visitas ao melhor: 389 | WR: 56.56% | Média passos/rollout: 0.0 | Reutilizados: 86 | Tempo: 2.8086s
+--- Jogada 6 (B) ---
+  [Minimax] Nós: 48037 | Prof.: 9 | Score: 0 | Tempo: 0.8706s
+--- Jogada 7 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 16 | Visitas ao melhor: 2028 | WR: 53.53% | Média passos/rollout: 0.0 | Reutilizados: 29 | Tempo: 2.5626s
+--- Jogada 8 (B) ---
+  [Minimax] Nós: 28748 | Prof.: 9 | Score: 0 | Tempo: 0.7320s
+--- Jogada 9 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 18 | Visitas ao melhor: 723 | WR: 56.71% | Média passos/rollout: 0.0 | Reutilizados: 2027 | Tempo: 2.5726s
+--- Jogada 10 (B) ---
+  [Minimax] Nós: 167393 | Prof.: 9 | Score: 0 | Tempo: 2.6534s
+--- Jogada 11 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 20 | Visitas ao melhor: 388 | WR: 61.08% | Média passos/rollout: 0.0 | Reutilizados: 87 | Tempo: 2.5656s
+--- Jogada 12 (B) ---
+  [Minimax] Nós: 11206 | Prof.: 9 | Score: 0 | Tempo: 0.3096s
+--- Jogada 13 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 21 | Visitas ao melhor: 2386 | WR: 55.24% | Média passos/rollout: 0.0 | Reutilizados: 387 | Tempo: 2.4311s
+--- Jogada 14 (B) ---
+  [Minimax] Nós: 214644 | Prof.: 9 | Score: 0 | Tempo: 3.3215s
+--- Jogada 15 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 23 | Visitas ao melhor: 331 | WR: 58.91% | Média passos/rollout: 0.0 | Reutilizados: 207 | Tempo: 2.2909s
+--- Jogada 16 (B) ---
+  [Minimax] Nós: 80834 | Prof.: 9 | Score: 0 | Tempo: 1.2933s
+--- Jogada 17 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 27 | Visitas ao melhor: 2043 | WR: 60.13% | Média passos/rollout: 0.0 | Reutilizados: 44 | Tempo: 2.2883s
+--- Jogada 18 (B) ---
+  [Minimax] Nós: 63651 | Prof.: 9 | Score: 0 | Tempo: 0.9090s
+--- Jogada 19 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 29 | Visitas ao melhor: 653 | WR: 60.34% | Média passos/rollout: 0.0 | Reutilizados: 1047 | Tempo: 2.1110s
+--- Jogada 20 (B) ---
+  [Minimax] Nós: 10386 | Prof.: 9 | Score: 0 | Tempo: 0.2946s
+--- Jogada 21 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 33 | Visitas ao melhor: 735 | WR: 64.08% | Média passos/rollout: 0.0 | Reutilizados: 652 | Tempo: 2.0189s
+--- Jogada 22 (B) ---
+  [Minimax] Nós: 8541 | Prof.: 9 | Score: 0 | Tempo: 0.2524s
+--- Jogada 23 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 36 | Visitas ao melhor: 2733 | WR: 60.35% | Média passos/rollout: 0.0 | Reutilizados: 734 | Tempo: 1.8091s
+--- Jogada 24 (B) ---
+  [Minimax] Nós: 62535 | Prof.: 9 | Score: 0 | Tempo: 1.1286s
+--- Jogada 25 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 34 | Visitas ao melhor: 499 | WR: 67.13% | Média passos/rollout: 0.0 | Reutilizados: 211 | Tempo: 1.9134s
+--- Jogada 26 (B) ---
+  [Minimax] Nós: 56308 | Prof.: 9 | Score: 0 | Tempo: 0.9740s
+--- Jogada 27 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 38 | Visitas ao melhor: 914 | WR: 66.63% | Média passos/rollout: 0.0 | Reutilizados: 72 | Tempo: 1.7222s
+--- Jogada 28 (B) ---
+  [Minimax] Nós: 2629 | Prof.: 9 | Score: 0 | Tempo: 0.0909s
+--- Jogada 29 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 43 | Visitas ao melhor: 2912 | WR: 57.31% | Média passos/rollout: 0.0 | Reutilizados: 913 | Tempo: 1.7142s
+--- Jogada 30 (B) ---
+  [Minimax] Nós: 11431 | Prof.: 9 | Score: 0 | Tempo: 0.2459s
+--- Jogada 31 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 43 | Visitas ao melhor: 1682 | WR: 56.72% | Média passos/rollout: 0.0 | Reutilizados: 2400 | Tempo: 1.7442s
+--- Jogada 32 (B) ---
+  [Minimax] Nós: 29807 | Prof.: 9 | Score: 0 | Tempo: 0.4686s
+--- Jogada 33 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 48 | Visitas ao melhor: 2514 | WR: 48.09% | Média passos/rollout: 0.0 | Reutilizados: 515 | Tempo: 1.5757s
+--- Jogada 34 (B) ---
+  [Minimax] Nós: 5121 | Prof.: 9 | Score: 0 | Tempo: 0.1480s
+--- Jogada 35 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 50 | Visitas ao melhor: 1310 | WR: 52.48% | Média passos/rollout: 0.0 | Reutilizados: 2513 | Tempo: 1.5658s
+--- Jogada 36 (B) ---
+  [Minimax] Nós: 2513 | Prof.: 9 | Score: 0 | Tempo: 0.0767s
+--- Jogada 37 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 49 | Visitas ao melhor: 3308 | WR: 51.09% | Média passos/rollout: 0.0 | Reutilizados: 1309 | Tempo: 1.3231s
+--- Jogada 38 (B) ---
+  [Minimax] Nós: 13611 | Prof.: 9 | Score: 0 | Tempo: 0.2375s
+--- Jogada 39 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 53 | Visitas ao melhor: 3167 | WR: 52.62% | Média passos/rollout: 0.0 | Reutilizados: 1896 | Tempo: 1.3565s
+--- Jogada 40 (B) ---
+  [Minimax] Nós: 3817 | Prof.: 9 | Score: 0 | Tempo: 0.0999s
+--- Jogada 41 (B) ---
+  [Minimax] Nós: 4151 | Prof.: 9 | Score: 1 | Tempo: 0.1076s
+--- Jogada 42 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 8 | Visitas ao melhor: 845 | WR: 28.28% | Média passos/rollout: 0.0 | Reutilizados: 0 | Tempo: 1.1562s
+--- Jogada 43 (B) ---
+  [Minimax] Nós: 20937 | Prof.: 9 | Score: 1 | Tempo: 0.3048s
+--- Jogada 44 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 10 | Visitas ao melhor: 562 | WR: 30.43% | Média passos/rollout: 0.0 | Reutilizados: 118 | Tempo: 1.4778s
+--- Jogada 45 (B) ---
+  [Minimax] Nós: 33174 | Prof.: 9 | Score: 1 | Tempo: 0.5444s
+--- Jogada 46 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 14 | Visitas ao melhor: 813 | WR: 32.60% | Média passos/rollout: 0.0 | Reutilizados: 57 | Tempo: 1.7003s
+--- Jogada 47 (B) ---
+  [Minimax] Nós: 13325 | Prof.: 9 | Score: 1 | Tempo: 0.2550s
+--- Jogada 48 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 17 | Visitas ao melhor: 938 | WR: 34.75% | Média passos/rollout: 0.0 | Reutilizados: 141 | Tempo: 1.6598s
+--- Jogada 49 (B) ---
+  [Minimax] Nós: 16505 | Prof.: 9 | Score: 1 | Tempo: 0.2563s
+--- Jogada 50 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 18 | Visitas ao melhor: 1179 | WR: 30.75% | Média passos/rollout: 0.0 | Reutilizados: 677 | Tempo: 1.6049s
+--- Jogada 51 (B) ---
+  [Minimax] Nós: 49221 | Prof.: 9 | Score: 1 | Tempo: 0.7342s
+--- Jogada 52 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 18 | Visitas ao melhor: 595 | WR: 28.74% | Média passos/rollout: 0.0 | Reutilizados: 288 | Tempo: 1.7811s
+--- Jogada 53 (B) ---
+  [Minimax] Nós: 41940 | Prof.: 9 | Score: 1 | Tempo: 0.6659s
+--- Jogada 54 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 20 | Visitas ao melhor: 768 | WR: 32.81% | Média passos/rollout: 0.0 | Reutilizados: 97 | Tempo: 1.5580s
+--- Jogada 55 (B) ---
+  [Minimax] Nós: 29220 | Prof.: 9 | Score: 1 | Tempo: 0.4449s
+--- Jogada 56 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 22 | Visitas ao melhor: 988 | WR: 32.39% | Média passos/rollout: 0.0 | Reutilizados: 225 | Tempo: 1.5441s
+--- Jogada 57 (B) ---
+  [Minimax] Nós: 67916 | Prof.: 9 | Score: 1 | Tempo: 1.2702s
+--- Jogada 58 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 24 | Visitas ao melhor: 686 | WR: 34.11% | Média passos/rollout: 0.0 | Reutilizados: 135 | Tempo: 1.8682s
+--- Jogada 59 (B) ---
+  [Minimax] Nós: 51451 | Prof.: 9 | Score: 1 | Tempo: 0.7488s
+--- Jogada 60 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 25 | Visitas ao melhor: 586 | WR: 38.31% | Média passos/rollout: 0.0 | Reutilizados: 92 | Tempo: 1.7759s
+--- Jogada 61 (B) ---
+  [Minimax] Nós: 89852 | Prof.: 9 | Score: 1 | Tempo: 1.3034s
+--- Jogada 62 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 28 | Visitas ao melhor: 650 | WR: 43.69% | Média passos/rollout: 0.0 | Reutilizados: 71 | Tempo: 1.6530s
+--- Jogada 63 (B) ---
+  [Minimax] Nós: 84750 | Prof.: 9 | Score: 1 | Tempo: 1.1558s
+--- Jogada 64 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 29 | Visitas ao melhor: 461 | WR: 34.49% | Média passos/rollout: 0.0 | Reutilizados: 188 | Tempo: 1.8844s
+--- Jogada 65 (B) ---
+  [Minimax] Nós: 175951 | Prof.: 9 | Score: 1 | Tempo: 2.4525s
+--- Jogada 66 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 32 | Visitas ao melhor: 512 | WR: 36.52% | Média passos/rollout: 0.0 | Reutilizados: 51 | Tempo: 1.6978s
+--- Jogada 67 (B) ---
+  [Minimax] Nós: 150860 | Prof.: 9 | Score: 1 | Tempo: 2.1029s
+--- Jogada 68 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 33 | Visitas ao melhor: 395 | WR: 35.19% | Média passos/rollout: 0.0 | Reutilizados: 127 | Tempo: 1.5608s
+--- Jogada 69 (B) ---
+  [Minimax] Nós: 292398 | Prof.: 9 | Score: 1 | Tempo: 4.0962s
+--- Jogada 70 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 36 | Visitas ao melhor: 411 | WR: 38.44% | Média passos/rollout: 0.0 | Reutilizados: 49 | Tempo: 1.6298s
+--- Jogada 71 (B) ---
+  [Minimax] Nós: 238885 | Prof.: 9 | Score: 1 | Tempo: 3.2869s
+--- Jogada 72 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 1990 | Prof. máx: 39 | Visitas ao melhor: 457 | WR: 40.70% | Média passos/rollout: 0.0 | Reutilizados: 65 | Tempo: 1.3585s
+--- Jogada 73 (B) ---
+  [Minimax] Nós: 293102 | Prof.: 9 | Score: 1 | Tempo: 4.2199s
+--- Jogada 74 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 41 | Visitas ao melhor: 502 | WR: 51.20% | Média passos/rollout: 0.0 | Reutilizados: 61 | Tempo: 1.3367s
+--- Jogada 75 (B) ---
+  [Minimax] Nós: 179206 | Prof.: 9 | Score: 1 | Tempo: 2.3350s
+--- Jogada 76 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 42 | Visitas ao melhor: 418 | WR: 43.06% | Média passos/rollout: 0.0 | Reutilizados: 142 | Tempo: 1.3178s
+--- Jogada 77 (B) ---
+  [Minimax] Nós: 220393 | Prof.: 9 | Score: 1 | Tempo: 3.3052s
+--- Jogada 78 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 1985 | Prof. máx: 46 | Visitas ao melhor: 843 | WR: 45.43% | Média passos/rollout: 0.0 | Reutilizados: 109 | Tempo: 1.0768s
+--- Jogada 79 (B) ---
+  [Minimax] Nós: 119794 | Prof.: 9 | Score: 1 | Tempo: 1.6051s
+--- Jogada 80 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 1977 | Prof. máx: 46 | Visitas ao melhor: 410 | WR: 41.71% | Média passos/rollout: 0.0 | Reutilizados: 124 | Tempo: 1.1725s
+--- Jogada 81 (B) ---
+  [Minimax] Nós: 208172 | Prof.: 9 | Score: 1 | Tempo: 2.9243s
+--- Jogada 82 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 49 | Visitas ao melhor: 731 | WR: 40.36% | Média passos/rollout: 0.0 | Reutilizados: 71 | Tempo: 1.1079s
+--- Jogada 83 (B) ---
+  [Minimax] Nós: 104474 | Prof.: 9 | Score: 1 | Tempo: 1.3886s
+--- Jogada 84 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 1974 | Prof. máx: 49 | Visitas ao melhor: 486 | WR: 38.68% | Média passos/rollout: 0.0 | Reutilizados: 349 | Tempo: 1.0744s
+--- Jogada 85 (B) ---
+  [Minimax] Nós: 134857 | Prof.: 9 | Score: 1 | Tempo: 2.0318s
+--- Jogada 86 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 2000 | Prof. máx: 53 | Visitas ao melhor: 631 | WR: 42.31% | Média passos/rollout: 0.0 | Reutilizados: 52 | Tempo: 1.0027s
+--- Jogada 87 (B) ---
+  [Minimax] Nós: 105967 | Prof.: 9 | Score: 1 | Tempo: 1.4902s
+--- Jogada 88 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 1981 | Prof. máx: 54 | Visitas ao melhor: 538 | WR: 43.31% | Média passos/rollout: 0.0 | Reutilizados: 237 | Tempo: 0.9592s
+--- Jogada 89 (B) ---
+  [Minimax] Nós: 95830 | Prof.: 9 | Score: 1 | Tempo: 1.3476s
+--- Jogada 90 (W) ---
+  [MCTS] Iterações: 2000 | Nós criados: 1945 | Prof. máx: 59 | Visitas ao melhor: 665 | WR: 37.44% | Média passos/rollout: 0.0 | Reutilizados: 132 | Tempo: 0.9001s
+--- Jogada 91 (B) ---
+  [Minimax] Nós: 25343 | Prof.: 9 | Score: 1 | Tempo: 0.3491s
+
+Fim de jogo. Resultado: Empate

@@ -27,15 +27,17 @@ BOARD = [
       
 EXEC_PARAMS:Final = {
     # Habilita a execução dos módulos pré-compilados em linguagem C
-    "cython": False,
+    "cython": True,
+    # Estabelece um limite de jogadas sem captura a fim de criar um empate e evitar jogo infinito
+    "no_capture_limit": 100,
     # Habilita a execução de simulações simultâneas
     "threaded_simulations": True,
     # Determina a quantidade de threads para execução de simulações simultâneas, só possui efeito se 'threaded_simulations' estiver como True
-    "max_threaded_simulations": 4,
+    "max_threaded_simulations": 8,
     # Parâmetros específicos da execução do Minimax (CPU)
     "minimax": {
         # Profundidade máxima da árvore de busca Minimax
-        "depth": 2,
+        "depth": 9,
         # Habilita avaliação paralela dos movimentos via ProcessPoolExecutor
         "threaded": True,
         # Número máximo de workers paralelos (None = automático pelo SO)
@@ -48,7 +50,7 @@ EXEC_PARAMS:Final = {
         # Quantidade máxima de nós iterados na árvore de escolhas MCTS
         "n_iterations": 2000,
         # Quantidade máxima de nós expandidos por nó pai
-        "max_steps": 512
+        "max_steps": 256
     },
     # Parâmetros espeacíficos da execução do MCTS auxiliar
     "human_mcts": {
